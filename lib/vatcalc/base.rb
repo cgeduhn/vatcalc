@@ -25,6 +25,13 @@ module Vatcalc
       @percentage_hash.keys
     end
 
+    def max_vat_percentage
+      percentages.max
+    end
+
+    alias :highest_percentage :max_vat_percentage
+    alias :max_percentage :max_vat_percentage
+
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 
     # "{1.0=>0.0092, 1.19=>0.8804, 1.07=>0.1104}"
@@ -44,14 +51,14 @@ module Vatcalc
         h = @percentage_hash.inject(Util::PercentageHash.new) {|h,(k,v)| h[k] = (v.net/n).round(4); h}
         #if there is a small difference correct it
         if diff = 1.00 - h.values.inject(0){|sum,x| sum += x }.round(4)
-          k = h.keys.max
+          k = max_vat_percentage
           h[k] = (h[k] + diff).round(4)
         end
         return h
       else
         #if the net is 0 then the highes percentage should have the full rate
         h = Util::PercentageHash.new
-        k = percentages.max
+        k = max_vat_percentage
         h[k] = 1.00 if k
         h
       end
