@@ -3,6 +3,7 @@ require 'active_support'
 
 require "vatcalc/util"
 require "vatcalc/base_object"
+require "vatcalc/base"
 
 
 module Vatcalc
@@ -12,6 +13,8 @@ module Vatcalc
   #German Standard Settings
   self.currency = "EUR"
   self.vat_percentage = 1.19
+
+
 
 
   class << self
