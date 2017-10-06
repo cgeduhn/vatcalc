@@ -31,4 +31,49 @@ RSpec.describe Vatcalc do
       expect(u.convert_to_money(m)).to eq(m)
     end
   end
+
+
+  describe "base_object with amount of 100" do 
+    Vatcalc.vat_percentage = 1.19
+    it "has correct values with standard vat percentage" do
+      obj = Vatcalc::BaseObject.new(value: 100.00)
+      expect(obj.net.to_f).to eq(84.03) 
+      expect(obj.vat.to_f).to eq(15.97) 
+    end
+
+    it "has correct values with 7 percent" do 
+      obj = Vatcalc::BaseObject.new(amount: 100.00,percentage: 7)
+      expect(obj.net.to_f).to eq(93.46) 
+      expect(obj.vat.to_f).to eq(6.54) 
+    end
+
+    it "has correct values with 0 percent" do 
+      obj = Vatcalc::BaseObject.new(gross: 100.00,percentage: 0)
+      expect(obj.net.to_f).to eq(100.00) 
+      expect(obj.vat.to_f).to eq(0.00) 
+    end
+  end
+
+  describe "base_object with amount of 45.45" do 
+    Vatcalc.vat_percentage = 1.19
+    it "has correct values with standard vat percentage" do
+      obj = Vatcalc::BaseObject.new(value: 45.45)
+      expect(obj.net.to_f).to eq(38.19) 
+      expect(obj.vat.to_f).to eq(7.26) 
+    end
+
+    it "has correct values with 7 percent" do 
+      obj = Vatcalc::BaseObject.new(amount: 45.45,percentage: 7)
+      expect(obj.net.to_f).to eq(42.48) 
+      expect(obj.vat.to_f).to eq(2.97) 
+    end
+
+    it "has correct values with 0 percent" do 
+      obj = Vatcalc::BaseObject.new(gross: 45.45,percentage: 0)
+      expect(obj.net.to_f).to eq(45.45) 
+      expect(obj.vat.to_f).to eq(0.00) 
+    end
+  end
+
+
 end
