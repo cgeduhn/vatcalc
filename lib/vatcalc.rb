@@ -13,12 +13,29 @@ module Vatcalc
   self.currency = "EUR"
   self.vat_percentage = 1.19
 
-  def self.vat_percentage
-    @vat_percentage 
-  end
 
-  def self.vat_percentage=(v)
-    @vat_percentage = Util.convert_to_percentage_value(v)
+  class << self
+    alias :percentage :vat_percentage
+    alias :percentage= :vat_percentage=
+
+
+    def vat_percentage
+      @vat_percentage 
+    end
+
+    def vat_percentage=(v)
+      @vat_percentage = Util.convert_to_percentage_value(v)
+    end
+
+
+    def vat_of(v,vp=nil)
+      BaseObject.new(value: v,percentage: vp).vat
+    end
+
+    def net_of(v,vp=nil)
+      BaseObject.new(value: v,percentage: vp).net
+    end
+
   end
 
 

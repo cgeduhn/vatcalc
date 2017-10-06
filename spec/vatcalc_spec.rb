@@ -30,6 +30,14 @@ RSpec.describe Vatcalc do
       m = Money.euro(1)
       expect(u.convert_to_money(m)).to eq(m)
     end
+
+    it "calculates correctly net" do
+      expect(Vatcalc.net_of(11.00).to_f).to eq(9.24)
+    end
+
+    it "calculates correctly net" do 
+      expect(Vatcalc.vat_of(11.00).to_f).to eq(1.76)
+    end
   end
 
 

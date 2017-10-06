@@ -1,7 +1,7 @@
 require 'active_support/core_ext/hash'
 module Vatcalc    
   class BaseObject
-    attr_reader :gross,:net,:vat,:percentage
+    attr_reader :gross,:percentage
     def initialize(options={})
       opt = options.to_h.with_indifferent_access
 
@@ -10,12 +10,16 @@ module Vatcalc
       curr = (opt[:currency] || opt[:curr] || Vatcalc.currency)
 
       @gross = Vatcalc::Util.convert_to_money(amount,curr)
-      percentage = Vatcalc::Util.convert_to_percentage_value(vp)
-
-
-      @net = @gross / percentage
-      @vat = @gross - @net
-      @percentage = percentage
+      @percentage = Vatcalc::Util.convert_to_percentage_value(vp)
     end
+
+    def net
+      @gross / self.percentage
+    end
+
+    def vat
+      @gross - net
+    end
+
   end
 end
