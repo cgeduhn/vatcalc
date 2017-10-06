@@ -1,8 +1,12 @@
+
+require "money"
+
+
 module Vatcalc 
   class Util
     def self.convert_to_money(obj,curr=nil)
-      curr ||= standard_currency
-      case a
+      curr ||= Vatcalc.currency
+      case obj
       when Fixnum
         Money.new(obj,curr)
       when Float

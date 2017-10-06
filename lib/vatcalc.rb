@@ -7,4 +7,5 @@ require "vatcalc/base_object"
 
 module Vatcalc
   mattr_accessor :currency
+  self.currency = "EUR"
 end
