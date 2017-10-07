@@ -11,13 +11,6 @@ module Vatcalc
     alias :insert :<<
     alias :add :<<
 
-    def max_vat_percentage
-      percentages.max
-    end
-
-    alias :highest_percentage :max_vat_percentage
-    alias :max_percentage :max_vat_percentage
-
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 
     # "{1.0=>0.0092, 1.19=>0.8804, 1.07=>0.1104}"
@@ -34,7 +27,7 @@ module Vatcalc
     def rates
       n = net
       h = Util::PercentageHash.new
-      k = max_vat_percentage
+      k = percentages.max
       if n != 0
         @collection.each do |elem|
           ek = elem.vat_percentage
