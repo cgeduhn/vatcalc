@@ -104,9 +104,9 @@ RSpec.describe Vatcalc::BaseObject do
       obj1 = Vatcalc::BaseObject.new(gross: 50.45,percentage: 0)
       obj2 = Vatcalc::BaseObject.new(gross: 45.45,percentage: 0)
 
-      result = (obj1 + obj2)
+      result = Vatcalc::Base.new << obj1 << obj2
 
-      expect(result).to be_kind_of(Vatcalc::BaseObject)
+
       expect(result.gross.to_f).to eq(95.90)
       expect(result.net.to_f).to eq(95.90)
       expect(result.vat.to_f).to eq(0)
@@ -115,9 +115,8 @@ RSpec.describe Vatcalc::BaseObject do
       obj1 = Vatcalc::BaseObject.new(gross: 47.47,percentage: 7)
       obj2 = Vatcalc::BaseObject.new(gross: 45.45,percentage: 7)
 
-      result = obj1 + obj2
+      result = Vatcalc::Base.new << obj1 << obj2
 
-      expect(result).to be_kind_of(Vatcalc::BaseObject)
       expect(result.gross.to_f).to eq(92.92)
       expect(result.net.to_f).to eq(86.84)
       expect(result.vat.to_f).to eq(6.08)
@@ -170,6 +169,8 @@ RSpec.describe Vatcalc::Base do
       p "#{b.rates}"
       expect(rounded_sum).to eq(100)
     end
+
+
   end
 end
 

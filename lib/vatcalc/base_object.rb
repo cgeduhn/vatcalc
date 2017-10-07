@@ -1,7 +1,6 @@
 require 'active_support/core_ext/hash'
 module Vatcalc    
   class BaseObject
-    GNV = [:gross,:net,:vat].freeze
 
     def self.convert(obj)
       case obj
@@ -31,14 +30,17 @@ module Vatcalc
     def vat_percentage=(vp)
       @vat_percentage = Util.convert_to_percentage_value(vp)
     end
-
+    
+    def gross=(g)
+      @gross = Util.convert_to_money(g,@currency)
+    end
 
     def net
-      @net ||= @gross / vat_percentage
+      @gross / vat_percentage
     end
 
     def vat
-      @vat ||= @gross - net
+      @gross - net
     end
 
 
@@ -46,26 +48,41 @@ module Vatcalc
     alias :percentage= :vat_percentage=
     alias :curr :currency
 
+    class Collection
+      include Enumerable
 
+      attr_reader :currency
+      def initialize()
+        @collection = []
+        @vat_percentages = Set.new 
+      end
 
-    [:+,:-].each do |add_method|
-      define_method(add_method) do |oth|
-        oth = self.class.convert(oth)
-        raise ArgumentError.new "Can't add two instances of #{self} with different VAT percentage" unless oth.percentage == percentage
-        self.class.new(percentage: percentage).tap do |new_object|
-          GNV.each {|m| new_object.send(:"#{m}=",send(m) + oth.send(m)) }
+      def vat_percentages
+        @vat_percentages.to_a
+      end
+
+      alias :percentages :vat_percentages
+
+      #META STUFF
+      #Adding 
+      #gross, vat, :net as methods here
+      Util::GNV.each do |m|
+        define_method(m) do 
+          @collection.sum(&:"#{m}")
         end
       end
-    end
 
-    protected
-
-    GNV.each do |m|
-      define_method(:"#{m}=") do |arg|
-        instance_variable_set(:"@#{m}",Util.convert_to_money(arg,@currency))
+      def <<(arg)
+        converted = BaseObject.convert(arg)
+        @vat_percentages << converted.percentage
+        @currency = converted.currency
+        @collection << converted
+        self
       end
-    end
 
+      delegate :each,:length, :to => :@collection
+
+    end
 
   end
 end

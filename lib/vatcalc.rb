@@ -1,5 +1,6 @@
 require "vatcalc/version"
 require 'active_support'
+require 'active_support/core_ext'
 
 require "vatcalc/util"
 require "vatcalc/base_object"

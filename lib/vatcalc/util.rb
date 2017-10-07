@@ -4,7 +4,6 @@ require "money"
 
 module Vatcalc 
   class Util
-    GN  =  [:gross,:net].freeze
     GNV =  [:gross,:net,:vat].freeze
 
     class << self
