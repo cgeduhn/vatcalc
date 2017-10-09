@@ -71,7 +71,7 @@ RSpec.describe Vatcalc::BaseObject do
 
 
   describe "with amount of 100" do 
-    Vatcalc.vat_percentage = 0.19
+    
     it "has correct values with standard vat percentage" do
       obj = Vatcalc::BaseObject.new(100.00)
       expect(obj.net.to_f).to eq(84.03) 
@@ -92,7 +92,7 @@ RSpec.describe Vatcalc::BaseObject do
   end
 
   describe "with amount of 45.45" do 
-    Vatcalc.vat_percentage = 0.19
+    
     it "has correct values with standard vat percentage" do
       obj = Vatcalc::BaseObject.new(45.45)
       expect(obj.net.to_f).to eq(38.19) 
