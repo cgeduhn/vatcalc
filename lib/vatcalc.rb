@@ -6,8 +6,8 @@ require "vatcalc/util"
 require "vatcalc/vat_percentage"
 
 require "vatcalc/gnv_object"
-require "vatcalc/base_object"
-require "vatcalc/base"
+require "vatcalc/base_element"
+require "vatcalc/vat_base"
 
 module Vatcalc
   mattr_accessor :currency
@@ -27,11 +27,11 @@ module Vatcalc
 
 
     def vat_of(v,vp=nil)
-      BaseObject.new(v,percentage: vp).vat
+      BaseElement.new(v,percentage: vp).vat
     end
 
     def net_of(v,vp=nil)
-      BaseObject.new(v,percentage: vp).net
+      BaseElement.new(v,percentage: vp).net
     end
 
   end

@@ -21,7 +21,7 @@ RSpec.describe Vatcalc::VATPercentage do
     expect(Vatcalc.percentage.to_f).to eq(1.19)
   end
 
-  it "comparse correctly" do
+  it "compares correctly" do
     s = perc.new(7)
     s1 = perc.new(7)
     b = perc.new(19)
@@ -53,7 +53,7 @@ RSpec.describe Vatcalc::Util do
     end
 
     it "calculates correctly net" do
-      b = Vatcalc::BaseObject.new(11.00)
+      b = Vatcalc::BaseElement.new(11.00)
       expect(Vatcalc.net_of(11.00).to_f).to eq(9.24)
     end
 
@@ -63,7 +63,7 @@ RSpec.describe Vatcalc::Util do
   end
 end
 
-RSpec.describe Vatcalc::BaseObject do
+RSpec.describe Vatcalc::BaseElement do
   it "has a version number" do
     expect(Vatcalc::VERSION).not_to be nil
   end
@@ -73,32 +73,32 @@ RSpec.describe Vatcalc::BaseObject do
   describe "with amount of 100" do 
     
     it "has correct values with standard vat percentage" do
-      obj = Vatcalc::BaseObject.new(100.00)
+      obj = Vatcalc::BaseElement.new(100.00)
       expect(obj.net.to_f).to eq(84.03) 
       expect(obj.vat.to_f).to eq(15.97) 
 
-      obj = Vatcalc::BaseObject.new(100.00,net: true)
+      obj = Vatcalc::BaseElement.new(100.00,net: true)
       expect(obj.net.to_f).to eq(100.00) 
       expect(obj.vat.to_f).to eq(19.00) 
     end
 
     it "has correct values with 7 percent" do 
-      obj = Vatcalc::BaseObject.new(100.00,percentage: 7)
+      obj = Vatcalc::BaseElement.new(100.00,percentage: 7)
       expect(obj.net.to_f).to eq(93.46) 
       expect(obj.vat.to_f).to eq(6.54) 
 
-      obj = Vatcalc::BaseObject.new(100.00,net: true,percentage: 7)
+      obj = Vatcalc::BaseElement.new(100.00,net: true,percentage: 7)
       expect(obj.net.to_f).to eq(100.00) 
       expect(obj.vat.to_f).to eq(7.00) 
     end
 
     it "has correct values with 0 percent" do 
-      obj = Vatcalc::BaseObject.new(100.00,percentage: 0)
+      obj = Vatcalc::BaseElement.new(100.00,percentage: 0)
       expect(obj.net.to_f).to eq(100.00) 
       expect(obj.vat.to_f).to eq(0.00) 
 
 
-      obj = Vatcalc::BaseObject.new(100.00,net: true,percentage: 0)
+      obj = Vatcalc::BaseElement.new(100.00,net: true,percentage: 0)
       expect(obj.net.to_f).to eq(100.00) 
       expect(obj.vat.to_f).to eq(0.00) 
     end
@@ -107,19 +107,19 @@ RSpec.describe Vatcalc::BaseObject do
   describe "with amount of 45.45" do 
     
     it "has correct values with standard vat percentage" do
-      obj = Vatcalc::BaseObject.new(45.45)
+      obj = Vatcalc::BaseElement.new(45.45)
       expect(obj.net.to_f).to eq(38.19) 
       expect(obj.vat.to_f).to eq(7.26) 
     end
 
     it "has correct values with 7 percent" do 
-      obj = Vatcalc::BaseObject.new(45.45,percentage: 7)
+      obj = Vatcalc::BaseElement.new(45.45,percentage: 7)
       expect(obj.net.to_f).to eq(42.48) 
       expect(obj.vat.to_f).to eq(2.97) 
     end
 
     it "has correct values with 0 percent" do 
-      obj = Vatcalc::BaseObject.new(45.45,percentage: 0)
+      obj = Vatcalc::BaseElement.new(45.45,percentage: 0)
       expect(obj.net.to_f).to eq(45.45) 
       expect(obj.vat.to_f).to eq(0.00) 
     end
@@ -128,10 +128,10 @@ RSpec.describe Vatcalc::BaseObject do
   describe "add two base objects" do 
 
     it "calculates correctly the sum" do 
-      obj1 = Vatcalc::BaseObject.new(50.45,percentage: 0)
-      obj2 = Vatcalc::BaseObject.new(45.45,percentage: 0)
+      obj1 = Vatcalc::BaseElement.new(50.45,percentage: 0)
+      obj2 = Vatcalc::BaseElement.new(45.45,percentage: 0)
 
-      result = Vatcalc::Base.new << obj1 << obj2
+      result = Vatcalc::VATBase.new << obj1 << obj2
 
 
       expect(result.gross.to_f).to eq(95.90)
@@ -139,10 +139,10 @@ RSpec.describe Vatcalc::BaseObject do
       expect(result.vat.to_f).to eq(0)
 
 
-      obj1 = Vatcalc::BaseObject.new(47.47,percentage: 7)
-      obj2 = Vatcalc::BaseObject.new(45.45,percentage: 7)
+      obj1 = Vatcalc::BaseElement.new(47.47,percentage: 7)
+      obj2 = Vatcalc::BaseElement.new(45.45,percentage: 7)
 
-      result = Vatcalc::Base.new << obj1 << obj2
+      result = Vatcalc::VATBase.new << obj1 << obj2
 
       expect(result.gross.to_f).to eq(92.92)
       expect(result.net.to_f).to eq(86.84)
@@ -156,8 +156,8 @@ RSpec.describe Vatcalc::BaseObject do
 end
 
 
-RSpec.describe Vatcalc::Base do
-  let (:b) {Vatcalc::Base.new}
+RSpec.describe Vatcalc::VATBase do
+  let (:b) {Vatcalc::VATBase.new}
   it "inserts anything correctly" do
     b << ([100.00, 7])
     expect(b.collection.length).to eq(1)
@@ -186,7 +186,7 @@ RSpec.describe Vatcalc::Base do
   it "has correctly rates" do
     r = Proc.new{|it| rand * (rand*100)}
     1000.times do |i|
-      b = Vatcalc::Base.new
+      b = Vatcalc::VATBase.new
       b << [r.call,0.00]
       b << [r.call,19]
       b << [r.call,7]

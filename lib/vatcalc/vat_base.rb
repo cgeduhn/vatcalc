@@ -1,6 +1,6 @@
 
 module Vatcalc    
-  class Base 
+  class VATBase 
 
     attr_reader :collection
 
@@ -18,15 +18,21 @@ module Vatcalc
       @vat_percentages.to_a
     end
 
-    def <<(oth)
-      converted = BaseObject.convert(oth)
+    def <<(obj)
+      insert(obj,1)
+    end
+
+    def insert(obj,quantity=1)
+      converted = BaseElement.convert(obj)
       @vat_percentages << converted.percentage.to_f
-      @collection << converted
-      @gnv ? @gnv += converted : @gnv = converted.to_gnv
+      quantity.times do 
+        c_dup = converted.dup
+        @collection << c_dup
+        @gnv ? @gnv += c_dup : @gnv = c_dup.to_gnv
+      end
       self
     end
 
-    alias :insert :<<
     alias :add :<<
     alias :percentages :vat_percentages
 
@@ -46,7 +52,7 @@ module Vatcalc
     def rates
       h = Hash.new 
       k = @vat_percentages.max
-      if net > 0
+      if net != 0
         @collection.each do |elem|
           ek = elem.vat_percentage.to_f
           h[ek] = (h[ek] ? h[ek] + elem.net : elem.net)
@@ -78,6 +84,8 @@ module Vatcalc
       #example ((1.19 - 1.00)*100).round(2) => 19.0
       rates.inject({}){|h,(pr,v)| h[((pr-1.00)*100).round(2)] = (v*100).round(2); h}
     end
+
+
 
   end
 end

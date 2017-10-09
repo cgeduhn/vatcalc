@@ -1,6 +1,6 @@
 require 'vatcalc/gnv_object'
 module Vatcalc    
-  class BaseObject < GNVObject
+  class BaseElement < GNVObject
 
     def self.convert(obj)
       case obj

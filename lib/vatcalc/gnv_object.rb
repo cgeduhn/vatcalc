@@ -15,8 +15,8 @@ module Vatcalc
 
     attr_reader :vector,:currency
     alias :curr :currency
-    def initialize(gross,net,currency=nil)
-      @currency ||= Vatcalc.currency
+    def initialize(gross,net,curr=nil)
+      @currency ||= (curr || Vatcalc.currency)
       @vector = Vector[*[gross,net].map{|i| Util.convert_to_money(i,@currency)}]
       raise ArgumentError.new "gross: #{gross.to_f} must >= net: #{net.to_f}" if self.gross.abs < self.net.abs
     end
@@ -26,24 +26,27 @@ module Vatcalc
 
     [:+,:-].each do |m_name|
       define_method(m_name) do |oth|
-        if oth.is_a?(GNVObject)
+        case oth
+        when GNVObject
           v = @vector.send(m_name,oth.vector)
-        elsif oth < Numeric
+        when Numeric
           v = @vector.send(m_name,oth)
-        elsif oth.respond_to?(:coerce)
-          #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
-          a, b = other.coerce(self)
-          return a.send(b)
         else
-          raise TypeError, "#{oth.class} can't be coerced into #{self.class}"
+          #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
+          if oth.respond_to?(:coerce)
+            a, b = other.coerce(self)
+            return a.send(b)
+          else
+            raise TypeError.new "#{oth.class} can't be coerced into #{self.class}"
+          end
         end
-        init_by_vector(v)
+        self.class.init_by_vector(v)
       end
     end
 
     #For usage of => - GNVObject.new(100.00,90.00)
     def -@
-      init_by_vector(-@vector)
+      self.class.init_by_vector(-@vector)
     end
 
     #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
@@ -68,11 +71,9 @@ module Vatcalc
       GNVObject.init_by_vector(@vector)
     end
 
-    delegate :init_by_vector, to: :class
-
     private 
     def self.init_by_vector(v)
-      new(v[0],v[1])
+      new(v[0],v[1],@currency)
     end
 
 
