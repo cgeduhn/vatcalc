@@ -1,4 +1,3 @@
-require 'active_support/core_ext/hash'
 require 'vatcalc/gnv_object'
 module Vatcalc    
   class BaseObject < GNVObject
@@ -21,7 +20,7 @@ module Vatcalc
     attr_reader :vat_percentage
 
     def initialize(amount,options={})
-      opt = options.to_h.with_indifferent_access
+      opt = options.to_h
       amount =  Util.convert_to_money(amount || 0)
       vp = (opt[:vat_percentage] || opt[:percentage])
 

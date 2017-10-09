@@ -3,6 +3,7 @@ require "matrix"
 #A GNV Object consists basically of a 2D Vector
 #first value is gross, second is net.
 #vat is calculated by gross - net
+#
 #gross is always greater or equal net
 #
 #example
@@ -21,7 +22,6 @@ module Vatcalc
     end
 
     delegate :==, to: :@vector
-    delegate :addition_klass,to: :class
 
 
     [:+,:-].each do |m_name|
