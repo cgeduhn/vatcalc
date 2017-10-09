@@ -1,6 +1,6 @@
 
 module Vatcalc    
-  class VATBase 
+  class Base 
 
     attr_reader :collection
 
@@ -10,7 +10,7 @@ module Vatcalc
     end
 
     def gnv
-      @gnv || GNVObject.new(0,0)
+      @gnv || GNV.new(0,0)
     end
     delegate :gross,:net,:vat,:curr,:currency, to: :gnv
 

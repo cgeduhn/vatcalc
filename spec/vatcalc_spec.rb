@@ -131,7 +131,7 @@ RSpec.describe Vatcalc::BaseElement do
       obj1 = Vatcalc::BaseElement.new(50.45,percentage: 0)
       obj2 = Vatcalc::BaseElement.new(45.45,percentage: 0)
 
-      result = Vatcalc::VATBase.new << obj1 << obj2
+      result = Vatcalc::Base.new << obj1 << obj2
 
 
       expect(result.gross.to_f).to eq(95.90)
@@ -142,7 +142,7 @@ RSpec.describe Vatcalc::BaseElement do
       obj1 = Vatcalc::BaseElement.new(47.47,percentage: 7)
       obj2 = Vatcalc::BaseElement.new(45.45,percentage: 7)
 
-      result = Vatcalc::VATBase.new << obj1 << obj2
+      result = Vatcalc::Base.new << obj1 << obj2
 
       expect(result.gross.to_f).to eq(92.92)
       expect(result.net.to_f).to eq(86.84)
@@ -156,8 +156,8 @@ RSpec.describe Vatcalc::BaseElement do
 end
 
 
-RSpec.describe Vatcalc::VATBase do
-  let (:b) {Vatcalc::VATBase.new}
+RSpec.describe Vatcalc::Base do
+  let (:b) {Vatcalc::Base.new}
   it "inserts anything correctly" do
     b << ([100.00, 7])
     expect(b.collection.length).to eq(1)
@@ -186,7 +186,7 @@ RSpec.describe Vatcalc::VATBase do
   it "has correctly rates" do
     r = Proc.new{|it| rand * (rand*100)}
     1000.times do |i|
-      b = Vatcalc::VATBase.new
+      b = Vatcalc::Base.new
       b << [r.call,0.00]
       b << [r.call,19]
       b << [r.call,7]

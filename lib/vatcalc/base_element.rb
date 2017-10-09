@@ -1,6 +1,5 @@
-require 'vatcalc/gnv_object'
 module Vatcalc    
-  class BaseElement < GNVObject
+  class BaseElement < GNV
 
     def self.convert(obj)
       case obj
@@ -43,10 +42,6 @@ module Vatcalc
     def inspect
       "#<#{self.class.name} vat_percentage:#{vat_percentage} gross:#{gross} net: #{net} vat:#{vat} >"
     end
-
-
-
-
 
   end
 end

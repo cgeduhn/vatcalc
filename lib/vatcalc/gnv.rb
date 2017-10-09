@@ -7,11 +7,11 @@ require "matrix"
 #gross is always greater or equal net
 #
 #example
-#GNVObject.new(10.00,9.00)
-#you can add or subtract two GNVObjects
-#GNVObject.new(10.00,9.00) + GNVObject.new(9.00,0.00)
+#GNV.new(10.00,9.00)
+#you can add or subtract two GNVs
+#GNV.new(10.00,9.00) + GNV.new(9.00,0.00)
 module Vatcalc
-  class GNVObject 
+  class GNV 
 
     attr_reader :vector,:currency
     alias :curr :currency
@@ -27,7 +27,7 @@ module Vatcalc
     [:+,:-].each do |m_name|
       define_method(m_name) do |oth|
         case oth
-        when GNVObject
+        when self.class
           v = @vector.send(m_name,oth.vector)
         when Numeric
           v = @vector.send(m_name,oth)
@@ -44,7 +44,7 @@ module Vatcalc
       end
     end
 
-    #For usage of => - GNVObject.new(100.00,90.00)
+    #For usage of => - GNV.new(100.00,90.00)
     def -@
       self.class.init_by_vector(-@vector)
     end
@@ -68,7 +68,7 @@ module Vatcalc
     end
 
     def to_gnv
-      GNVObject.init_by_vector(@vector)
+      GNV.init_by_vector(@vector)
     end
 
     private 

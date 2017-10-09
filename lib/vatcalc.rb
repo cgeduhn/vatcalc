@@ -5,9 +5,9 @@ require 'active_support/core_ext'
 require "vatcalc/util"
 require "vatcalc/vat_percentage"
 
-require "vatcalc/gnv_object"
+require "vatcalc/gnv"
 require "vatcalc/base_element"
-require "vatcalc/vat_base"
+require "vatcalc/base"
 
 module Vatcalc
   mattr_accessor :currency
