@@ -10,8 +10,7 @@ module Vatcalc
       when Fixnum,String,Money,Float
         new(obj)
       when Hash
-        a = (obj.delete(:amount) || obj.delete(:gross) || obj.delete(:value))
-        new(a,obj)
+        new(obj[:amount] || obj[:gross] || obj[:value],obj)
       when Array
         new(obj[0], percentage: obj[1],currency: obj[2])
       else
