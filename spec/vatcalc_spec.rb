@@ -193,7 +193,7 @@ RSpec.describe Vatcalc::Base do
   end
 
   it "has correctly rates" do
-    r = Proc.new{|it| rand * (rand*100)}
+    r = Proc.new{|it| rand(100000).to_f * (rand*100)}
     1000.times do |i|
       b = Vatcalc::Base.new
       b << [r.call,0.00]
@@ -201,13 +201,17 @@ RSpec.describe Vatcalc::Base do
       b << [r.call,7]
       vs = b.rates.values.collect{|s| (s*100).round(2)}
       rounded_sum = vs.inject(0){|s,i| s+=i}.round(4)
-      #p "---#{b.human_rates}"
-      p "#{b.human_rates}"
+      # p "---#{b.rates}"
+      # p "#{b.human_rates}"
       expect(rounded_sum).to eq(100)
     end
 
 
   end
+end
+
+
+RSpec.describe Vatcalc::Service do 
 end
 
 

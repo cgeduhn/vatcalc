@@ -3,8 +3,8 @@ require "matrix"
 # A GNV Object consists basically of a 2D Vector
 # First value is gross, second is net.
 # Vat is calculated by gross - net
-#
-# Gross is always greater or equal net
+# 
+# GNV is an abstract Object and should only used for internal calculations in this library.
 #
 #@example
 # GNV.new(10.00,9.00)
@@ -19,6 +19,7 @@ module Vatcalc
     
     alias :curr :currency
     delegate :==, to: :@vector
+    delegate :<,:>,:<=,:>=, to: :net
 
     def initialize(gross,net,curr=nil)
       @currency ||= (curr || Vatcalc.currency)
@@ -29,7 +30,7 @@ module Vatcalc
     [:+,:-].each do |m_name|
       define_method(m_name) do |oth|
         case oth
-        when self.class
+        when GNV
           v = @vector.send(m_name,oth.vector)
         when Numeric
           v = @vector.send(m_name,oth)

@@ -78,6 +78,8 @@ module Vatcalc
       [@value,self.class.name].hash
     end
 
+    
+
 
 
     private 

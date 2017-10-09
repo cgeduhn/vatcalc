@@ -2,6 +2,7 @@
 module Vatcalc    
   class Base 
 
+    attr_reader :currency
     def initialize()
       @grouped_elements = {}
       @gnv = GNV.new(0,0)
@@ -24,6 +25,7 @@ module Vatcalc
       else
         raise ArgumentError.new "#{obj} can't be converted into an #{self}"
       end
+
       quantity.times do 
         obj_dup = obj.dup
         (@grouped_elements[obj.vat_percentage] ||= []) << obj_dup
@@ -45,9 +47,7 @@ module Vatcalc
 
     alias :collection :elements
 
-
-
-    alias :add :<<
+    alias :add :insert
     alias :percentages :vat_percentages
 
     # Output of rates in form of
@@ -67,6 +67,7 @@ module Vatcalc
       @rates ||= rates!
     end
 
+    #@see +rates+
     def rates!
       rate_hash = Hash.new 
       max_p = vat_percentages.max
