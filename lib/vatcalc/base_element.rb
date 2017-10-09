@@ -23,8 +23,8 @@ module Vatcalc
     alias :percentage :vat_percentage
     delegate :+,:-, to: :to_gnv
 
-    def to_base
-      Base.new.insert(self)
+    def to_base(quantity=1)
+      Base.new.insert(self,quantity)
     end
 
 

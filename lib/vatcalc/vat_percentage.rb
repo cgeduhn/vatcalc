@@ -1,5 +1,8 @@
 module Vatcalc
   class VATPercentage < Numeric
+
+    include Comparable
+
     attr_reader :value
 
     def initialize(obj)
@@ -7,16 +10,15 @@ module Vatcalc
       when VATPercentage
         obj.value
       when 0.00..0.99
-        as_d(obj.to_f + 1.00).to_f
+        as_d(obj.to_f + 1.00)
       when 1..100.00
-        as_d((obj.to_f / 100 ) + 1.00).to_f
+        as_d((obj.to_f / 100 ) + 1.00)
       else
         raise TypeError.new("Can't convert #{obj.class} #{obj} to an valid #{self.class}")
       end
     end
 
-    delegate :to_i, to: :to_d
-    delegate :to_s, to: :to_f
+    delegate :to_i,:to_s, to: :to_d
 
     def coerce(other)
       [self,other]
@@ -31,7 +33,7 @@ module Vatcalc
       when VATPercentage
         @value == other.value
       when Numeric
-        @value == as_d(other).to_f
+        @value == as_d(other)
       else
         false
       end
@@ -56,15 +58,26 @@ module Vatcalc
     end
 
     def to_d
-      as_d(@value)
-    end
-
-    def to_f
       @value
     end
 
+    def to_f
+      @value.to_f
+    end
+
     def inspect
-      "#<#{self.class.name} vat_percentage:#{to_f}>"
+      "#<#{self.class.name} vat_percentage:#{to_d}>"
+    end
+
+    # Returns a Integer hash value based on the +value+
+    # in order to use functions like & (intersection), group_by, etc.
+    #
+    # @return [Integer]
+    #
+    # @example
+    #   Money.new(100).hash #=> 908351
+    def hash
+      [@value,self.class.name].hash
     end
 
 

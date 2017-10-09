@@ -4,26 +4,22 @@ require "money"
 
 module Vatcalc 
   class Util
-    class << self
-
-      def convert_to_money(obj,curr=nil)
-        curr ||= Vatcalc.currency
-        case obj
-        when Fixnum
-          Money.new(obj,curr)
-        when Numeric
-          Money.new(obj*100,curr)
-        when Money
-          obj
-        else
-          raise InvalidAmountError.new "#{obj.class.name} => #{obj}"
-        end
+    def self.convert_to_money(obj,curr=nil)
+      curr ||= Vatcalc.currency
+      case obj
+      when Money
+        obj
+      when Fixnum
+        Money.new(obj,curr)
+      when Numeric
+        Money.new(obj*100,curr)
+      else
+        raise InvalidAmountError.new "Can't convert #{obj.class} to an Money instance"
       end
-
     end
   end
 
 
-  class InvalidAmountError < ArgumentError
+  class InvalidAmountError < TypeError
   end
 end

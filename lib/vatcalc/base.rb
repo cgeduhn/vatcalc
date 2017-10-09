@@ -4,7 +4,6 @@ module Vatcalc
 
     def initialize()
       @grouped_elements = {}
-      @elements = []
       @gnv = GNV.new(0,0)
     end
 
@@ -27,7 +26,7 @@ module Vatcalc
       end
       quantity.times do 
         obj_dup = obj.dup
-        (@grouped_elements[obj.vat_percentage.to_f] ||= []) << obj_dup
+        (@grouped_elements[obj.vat_percentage] ||= []) << obj_dup
         @gnv += obj_dup.to_gnv
       end
       @rates = nil

@@ -189,7 +189,7 @@ RSpec.describe Vatcalc::Base do
     b << [0,0.00]
     expect(b.collection.first.percentage.to_f).to eq(1.00)
     expect(b.percentages).to eq([Vatcalc::VATPercentage.new(0.00)])
-    expect(b.rates).to eq({1.0 => 1.00})
+    expect(b.rates).to eq({Vatcalc::VATPercentage.new(0.00) => 1.00})
   end
 
   it "has correctly rates" do
