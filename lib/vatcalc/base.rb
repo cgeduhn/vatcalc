@@ -95,7 +95,7 @@ module Vatcalc
     # {0.0=>11.56, 19.0=>10.71, 7.0=>77.73}"
     def human_rates
       #example ((1.19 - 1.00)*100).round(2) => 19.0
-      rates.inject({}){|h,(pr,v)| h[((pr-1.00)*100).round(2)] = (v*100).round(2); h}
+      rates.inject({}){|h,(pr,v)| h[((pr.to_f-1.00)*100).round(2)] = (v*100).round(2); h}
     end
 
 

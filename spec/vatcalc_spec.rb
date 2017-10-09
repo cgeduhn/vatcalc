@@ -202,7 +202,7 @@ RSpec.describe Vatcalc::Base do
       vs = b.rates.values.collect{|s| (s*100).round(2)}
       rounded_sum = vs.inject(0){|s,i| s+=i}.round(4)
       #p "---#{b.human_rates}"
-      p "#{b.rates}"
+      p "#{b.human_rates}"
       expect(rounded_sum).to eq(100)
     end
 
