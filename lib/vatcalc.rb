@@ -38,6 +38,6 @@ module Vatcalc
 
   #German Standard Settings
   self.currency = "EUR"
-  Vatcalc.vat_percentage= 19.00
+  self.vat_percentage= 19.00
 
 end

@@ -3,8 +3,7 @@ require "spec_helper"
 RSpec.describe Vatcalc::VATPercentage do
   let (:perc){Vatcalc::VATPercentage}
   it "will initialized correctly" do 
-    expect Vatcalc.percentage = 19.00
-    expect(Vatcalc.percentage.to_f).to eq(1.19)
+    #expect(Vatcalc.percentage.to_f).to eq(1.19)
     #expect(u.convert_to_percentage_value(1.19)).to eq(1.19)
     expect(perc.new(0.19).to_f).to eq(1.19)
     expect(perc.new(19).to_f).to eq(1.19)
@@ -93,7 +92,7 @@ RSpec.describe Vatcalc::BaseObject do
   end
 
   describe "with amount of 45.45" do 
-    Vatcalc.vat_percentage = 1.19
+    Vatcalc.vat_percentage = 0.19
     it "has correct values with standard vat percentage" do
       obj = Vatcalc::BaseObject.new(45.45)
       expect(obj.net.to_f).to eq(38.19) 
