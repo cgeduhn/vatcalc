@@ -24,13 +24,19 @@ module Vatcalc
       opt = options.to_h.with_indifferent_access
       amount =  Util.convert_to_money(amount || 0)
       vp = (opt[:vat_percentage] || opt[:percentage])
+
+      
       @vat_percentage = vp ? VATPercentage.new(vp) : Vatcalc.vat_percentage
+
+      # is the amount a net value or a gross value
       if opt[:net] == true
         super(amount * vat_percentage, amount, (opt[:currency] || opt[:curr]))
       else
         super(amount,amount / vat_percentage,(opt[:currency] || opt[:curr]))
       end
     end
+
+
     alias :percentage :vat_percentage
     delegate :+,:-, to: :to_gnv
 
