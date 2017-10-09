@@ -1,15 +1,34 @@
 
 module Vatcalc    
-  class Base
+  class Base 
 
     attr_reader :collection
-    def initialize
-      @collection = BaseObject::Collection.new
+
+    def initialize()
+      @collection = []
+      @vat_percentages = Set.new 
     end
 
-    delegate :<<, :percentages, *Vatcalc::Util::GNV, to: :@collection 
+    def gnv
+      @gnv || GNVObject.new(0,0)
+    end
+    delegate :gross,:net,:vat,:curr,:currency, to: :gnv
+
+    def vat_percentages
+      @vat_percentages.to_a
+    end
+
+    def <<(oth)
+      converted = BaseObject.convert(oth)
+      @vat_percentages << converted.percentage.to_f
+      @collection << converted
+      @gnv ? @gnv += converted : @gnv = converted.to_gnv
+      self
+    end
+
     alias :insert :<<
     alias :add :<<
+    alias :percentages :vat_percentages
 
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 
@@ -25,15 +44,14 @@ module Vatcalc
     # "{1.0=>0.2475, 1.19=>0.3371, 1.07=>0.4154}"
     # "{1.0=>0.1739, 1.19=>0.5261, 1.07=>0.3}"
     def rates
-      n = net
-      h = Util::PercentageHash.new
-      k = percentages.max
-      if n != 0
+      h = Hash.new 
+      k = @vat_percentages.max
+      if net > 0
         @collection.each do |elem|
-          ek = elem.vat_percentage
+          ek = elem.vat_percentage.to_f
           h[ek] = (h[ek] ? h[ek] + elem.net : elem.net)
         end
-        h.each {|k,v| h[k] = (v/n).round(4)}
+        h.each {|k,v| h[k] = (v/net).round(4)}
         #if there is a small difference correct it
         if diff = 1.00 - h.values.sum.round(4)
           h[k] = (h[k] + diff).round(4)
