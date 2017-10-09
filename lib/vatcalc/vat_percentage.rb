@@ -18,27 +18,20 @@ module Vatcalc
       end
     end
 
-    delegate :to_i,:to_s, to: :to_d
+    delegate :to_i,:to_s,:to_f, to: :to_d
 
-    def coerce(other)
-      [self,other]
-    end
 
+    #For comparisaon between a value or a +VATPercentage+
+    #@return [Intger]
+    #@see module Comparable
     def <=>(other)
       to_d <=> as_d(other)
     end
 
-    def ==(other)
-      case other 
-      when VATPercentage
-        @value == other.value
-      when Numeric
-        @value == as_d(other)
-      else
-        false
-      end
-    end
-
+    #Returns a gross value
+    #@return [Money]
+    #@example
+    # => 10.00 * VATPercentage.new(19) #=> #<Money fractional:1190 currency:EUR> 
     def *(other)
       case other
       when Money
@@ -57,12 +50,17 @@ module Vatcalc
       end
     end
 
-    def to_d
-      @value
+    #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
+    #Basic usage so that you can write:
+    # + 10.00 * VATPercentage.new(19) + 
+    # and:  
+    # + VATPercentage.new(19) * 10.00 + 
+    def coerce(other)
+      [self,other]
     end
 
-    def to_f
-      @value.to_f
+    def to_d
+      @value
     end
 
     def inspect
@@ -75,7 +73,7 @@ module Vatcalc
     # @return [Integer]
     #
     # @example
-    #   Money.new(100).hash #=> 908351
+    #   VATPercentage.new(19).hash #=> 908351
     def hash
       [@value,self.class.name].hash
     end
