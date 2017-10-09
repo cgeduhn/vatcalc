@@ -1,3 +1,8 @@
+# A Base Element Object inherits from GNV
+#@see Vatcalc::GNV
+#
+# A BaseElement always needs an VAT percentage
+# if no VAT Percentage is given it takes the default VAT Percentage
 module Vatcalc    
   class BaseElement < GNV
 
@@ -5,11 +10,10 @@ module Vatcalc
 
     def initialize(amount,options={})
       opt = options.to_h
+
       amount =  Util.convert_to_money(amount || 0)
-      vp = (opt[:vat_percentage] || opt[:percentage])
-
-
-      @vat_percentage = vp ? VATPercentage.new(vp) : Vatcalc.vat_percentage
+      
+      @vat_percentage = (vp = (opt[:vat_percentage] || opt[:percentage])) ? VATPercentage.new(vp) : Vatcalc.vat_percentage
 
       # is the amount a net value or a gross value
       if opt[:net] == true

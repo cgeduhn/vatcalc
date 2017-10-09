@@ -51,7 +51,7 @@ module Vatcalc
     end
 
     #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
-    #Basic usage so that you can write:
+    #Basic usage of coerce. Now you can write:
     # + 10.00 * VATPercentage.new(19) + 
     # and:  
     # + VATPercentage.new(19) * 10.00 + 

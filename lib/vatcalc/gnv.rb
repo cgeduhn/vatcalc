@@ -1,15 +1,16 @@
 require "matrix"
 
-#A GNV Object consists basically of a 2D Vector
-#first value is gross, second is net.
-#vat is calculated by gross - net
+# A GNV Object consists basically of a 2D Vector
+# First value is gross, second is net.
+# Vat is calculated by gross - net
 #
-#gross is always greater or equal net
+# Gross is always greater or equal net
 #
-#example
-#GNV.new(10.00,9.00)
-#you can add or subtract two GNVs
-#GNV.new(10.00,9.00) + GNV.new(9.00,0.00)
+#@example
+# GNV.new(10.00,9.00)
+#
+# You can add or subtract two GNVs
+# GNV.new(10.00,9.00) + GNV.new(9.00,0.00)
 module Vatcalc
   class GNV 
 
@@ -24,9 +25,6 @@ module Vatcalc
       @vector = Vector[*[gross,net].map{|i| Util.convert_to_money(i,@currency)}]
       raise ArgumentError.new "gross: #{gross.to_f} must >= net: #{net.to_f}" if self.gross.abs < self.net.abs
     end
-
-    
-
 
     [:+,:-].each do |m_name|
       define_method(m_name) do |oth|

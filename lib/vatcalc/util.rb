@@ -4,6 +4,10 @@ require "money"
 
 module Vatcalc 
   class Util
+    #Converts an Object into a Money object
+    #@return [Money]
+    #@example 
+    # => Vatcalc::Util.convert_to_money(10.00) 
     def self.convert_to_money(obj,curr=nil)
       curr ||= Vatcalc.currency
       case obj
