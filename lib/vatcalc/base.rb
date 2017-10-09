@@ -2,20 +2,10 @@
 module Vatcalc    
   class Base 
 
-    attr_reader :collection
-
     def initialize()
-      @collection = []
-      @vat_percentages = Set.new 
-    end
-
-    def gnv
-      @gnv || GNV.new(0,0)
-    end
-    delegate :gross,:net,:vat,:curr,:currency, to: :gnv
-
-    def vat_percentages
-      @vat_percentages.to_a
+      @grouped_elements = {}
+      @elements = []
+      @gnv = GNV.new(0,0)
     end
 
     def <<(obj)
@@ -23,15 +13,40 @@ module Vatcalc
     end
 
     def insert(obj,quantity=1)
-      converted = BaseElement.convert(obj)
-      @vat_percentages << converted.percentage.to_f
-      quantity.times do 
-        c_dup = converted.dup
-        @collection << c_dup
-        @gnv ? @gnv += c_dup : @gnv = c_dup.to_gnv
+      obj = case obj
+      when BaseElement
+        obj
+      when Numeric,Money
+        BaseElement.new(obj)
+      when Hash
+        BaseElement.new(obj[:amount] || obj[:gross] || obj[:value],obj)
+      when Array
+        BaseElement.new(obj[0], percentage: obj[1],currency: obj[2])
+      else
+        raise ArgumentError.new "#{obj} can't be converted into an #{self}"
       end
+      quantity.times do 
+        obj_dup = obj.dup
+        (@grouped_elements[obj.vat_percentage.to_f] ||= []) << obj_dup
+        @gnv += obj_dup.to_gnv
+      end
+      @rates = nil
       self
     end
+
+    delegate :gross,:net,:vat,:curr,:currency, to: :@gnv
+
+    def vat_percentages
+      @grouped_elements.keys
+    end
+
+    def elements
+      @grouped_elements.values.flatten
+    end
+
+    alias :collection :elements
+
+
 
     alias :add :<<
     alias :percentages :vat_percentages
@@ -50,24 +65,23 @@ module Vatcalc
     # "{1.0=>0.2475, 1.19=>0.3371, 1.07=>0.4154}"
     # "{1.0=>0.1739, 1.19=>0.5261, 1.07=>0.3}"
     def rates
-      h = Hash.new 
-      k = @vat_percentages.max
+      @rates ||= rates!
+    end
+
+    def rates!
+      rate_hash = Hash.new 
+      max_p = vat_percentages.max
       if net != 0
-        @collection.each do |elem|
-          ek = elem.vat_percentage.to_f
-          h[ek] = (h[ek] ? h[ek] + elem.net : elem.net)
-        end
-        h.each {|k,v| h[k] = (v/net).round(4)}
+        @grouped_elements.each { |vp,elems| rate_hash[vp] = (elems.sum.net/net).round(4) }
         #if there is a small difference correct it
-        if diff = 1.00 - h.values.sum.round(4)
-          h[k] = (h[k] + diff).round(4)
+        if diff = 1.00 - rate_hash.values.sum.round(4)
+          rate_hash[max_p] = (rate_hash[max_p] + diff).round(4)
         end
-        return h
       else
         #if the net is 0 then the highes percentage should have the full rate
-        h[k] = 1.00 if k
-        h
+        rate_hash[max_p] = 1.00 if max_p
       end
+      @rates = rate_hash
     end
 
     # Output of rates in form of

@@ -14,14 +14,18 @@ module Vatcalc
   class GNV 
 
     attr_reader :vector,:currency
+
+    
     alias :curr :currency
+    delegate :==, to: :@vector
+
     def initialize(gross,net,curr=nil)
       @currency ||= (curr || Vatcalc.currency)
       @vector = Vector[*[gross,net].map{|i| Util.convert_to_money(i,@currency)}]
       raise ArgumentError.new "gross: #{gross.to_f} must >= net: #{net.to_f}" if self.gross.abs < self.net.abs
     end
 
-    delegate :==, to: :@vector
+    
 
 
     [:+,:-].each do |m_name|

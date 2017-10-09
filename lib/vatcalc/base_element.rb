@@ -1,21 +1,6 @@
 module Vatcalc    
   class BaseElement < GNV
 
-    def self.convert(obj)
-      case obj
-      when self
-        obj
-      when Fixnum,String,Money,Float
-        new(obj)
-      when Hash
-        new(obj[:amount] || obj[:gross] || obj[:value],obj)
-      when Array
-        new(obj[0], percentage: obj[1],currency: obj[2])
-      else
-        raise ArgumentError.new "#{obj} can't be converted into an #{self}"
-      end
-    end
-
     attr_reader :vat_percentage
 
     def initialize(amount,options={})
@@ -37,6 +22,10 @@ module Vatcalc
 
     alias :percentage :vat_percentage
     delegate :+,:-, to: :to_gnv
+
+    def to_base
+      Base.new.insert(self)
+    end
 
 
     def inspect

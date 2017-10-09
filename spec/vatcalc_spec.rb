@@ -147,7 +147,16 @@ RSpec.describe Vatcalc::BaseElement do
       expect(result.gross.to_f).to eq(92.92)
       expect(result.net.to_f).to eq(86.84)
       expect(result.vat.to_f).to eq(6.08)
+    end
 
+
+    it "can add an object with quantity 10" do 
+      obj1 = Vatcalc::BaseElement.new(10.00,vat_percentage: 19)
+      result = Vatcalc::Base.new.insert(obj1,10)
+
+      expect(result.gross.to_f).to eq(100.00)
+      expect(result.net.to_f).to eq(84.00)
+      expect(result.vat.to_f).to eq(16.00)
     end
 
   end

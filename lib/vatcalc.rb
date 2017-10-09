@@ -8,6 +8,7 @@ require "vatcalc/vat_percentage"
 require "vatcalc/gnv"
 require "vatcalc/base_element"
 require "vatcalc/base"
+require "vatcalc/service"
 
 module Vatcalc
   mattr_accessor :currency
