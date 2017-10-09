@@ -6,8 +6,10 @@ module Vatcalc
       @value = case obj
       when VATPercentage
         obj.value
-      when Numeric
-        convert_numeric_to_value(obj)
+      when 0.00..0.99
+        as_d(obj.to_f + 1.00).to_f
+      when 1..100.00
+        as_d((obj.to_f / 100 ) + 1.00).to_f
       else
         raise TypeError.new("Can't convert #{obj.class} #{obj} to an valid #{self.class}")
       end
@@ -28,8 +30,8 @@ module Vatcalc
       case other 
       when VATPercentage
         @value == other.value
-      when Numeric,Float,Rational
-        @value == convert_numeric_to_value(other)
+      when Numeric
+        @value == as_d(other).to_f
       else
         false
       end
@@ -75,16 +77,6 @@ module Vatcalc
         BigDecimal.new(num.to_s.empty? ? 0 : num.to_s)
       end
     end
-
-    def convert_numeric_to_value(num)
-      case num
-      when 0.00..0.99
-        as_d(num.to_f + 1.00).to_f
-      when 1..100.00
-        as_d((num.to_f / 100 ) + 1.00).to_f
-      end
-    end
-
 
   end
 end
