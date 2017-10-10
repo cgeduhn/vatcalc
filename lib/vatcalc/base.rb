@@ -5,7 +5,6 @@ module Vatcalc
     def initialize()
       @grouped_amounts = {}
       @elements = Hash.new(0)
-      @rates_changed = true
     end
 
     def <<(obj)

@@ -9,7 +9,7 @@ module Vatcalc
       @gross = Util.convert_to_money( amount || 0, currency )
     end
 
-    delegate :rates,:currency,:vat_percentages, to: :base
+    delegate :rates,:rates_changed?,:currency,:vat_percentages, to: :base
 
     def base
       @base || Base.new
@@ -44,7 +44,7 @@ module Vatcalc
     #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
     #
     def gross_splitted
-      
+
     end
 
 
