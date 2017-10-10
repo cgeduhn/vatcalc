@@ -2,8 +2,10 @@
 module Vatcalc    
   class Base 
 
+    attr_reader :elements
     def initialize()
-      @grouped_elements = {}
+      @grouped_amounts = {}
+      @elements = []
       @total = GNV.new(0,0)
     end
 
@@ -25,23 +27,29 @@ module Vatcalc
         raise TypeError.new "#{obj} can't be converted into a BaseElement"
       end
 
-      arr = (@grouped_elements[obj.vat_percentage] ||= [])
-      arr.fill(obj, arr.size, quantity)
-      @total += (obj * quantity)
+      gnv = (obj * quantity)
 
-      @rates = nil
+      @grouped_amounts[obj.vat_percentage] ? @grouped_amounts[obj.vat_percentage] += gnv : @grouped_amounts[obj.vat_percentage] = gnv
+
+      @elements.fill(obj, @elements.size, quantity) 
+
+      @total += gnv
+
+      rates!
+
       self
+    end
+
+    def [](arg)
+      @grouped_amounts[(arg.is_a?(VATPervcentage) ? arg : VATPercentage.new(arg))]
     end
 
     delegate :gross,:net,:vat,:curr,:currency, to: :@total
 
     def vat_percentages
-      @grouped_elements.keys
+      @grouped_amounts.keys
     end
 
-    def elements
-      @grouped_elements.values.flatten
-    end
 
     alias :collection :elements
 
@@ -62,21 +70,22 @@ module Vatcalc
     # "{1.0=>0.2475, 1.19=>0.3371, 1.07=>0.4154}"
     # "{1.0=>0.1739, 1.19=>0.5261, 1.07=>0.3}"
     def rates
-      @rates ||= rates!
+      @rates || rates!
     end
 
     #@see +rates+
     def rates!
-      rate_hash = Hash.new 
       max_p = vat_percentages.max
-      if net != 0
-        @grouped_elements.each { |vp,elems| rate_hash[vp] = (elems.sum.net/net).round(4) }
-        #if there is a small difference correct it
+      rate_hash = Hash.new(0.00)
+      if net != 0 
+        @grouped_amounts.each { |(vp,gnv)| rate_hash[vp] = (gnv.net/net).round(4) }
+        #it can be that there is a small difference.
+        #so it should be corrected her
         if diff = 1.00 - rate_hash.values.sum.round(4)
           rate_hash[max_p] = (rate_hash[max_p] + diff).round(4)
         end
       else
-        #if the net is 0 then the highes percentage should have the full rate
+        rate_hash = @grouped_amounts.each { |(vp,gnv)| rate_hash[vp] = 0.00 }
         rate_hash[max_p] = 1.00 if max_p
       end
       @rates = rate_hash
