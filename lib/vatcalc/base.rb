@@ -94,13 +94,13 @@ module Vatcalc
         tolerance = BigDecimal("1E-5")
         # the diff has to be negative so not over 1.00 and the absolut value has to be smaler than the tolerance 
         while diff.positive? || diff.abs >= tolerance
-          # if diff is bigger than the tolerance it has to be distributed over all vat_percentage rates
+          # if diff is bigger than the tolerance it has to be allocated over all vat_percentage rates
           if diff.abs > tolerance
             eps = (diff / l) # if if negativ eps will be postive 
             @rate_hash.each { |k,v| @rate_hash[k] = (eps + v).round(6) }
           else
-            #the diff is equal the tolerance or is positiv so i take the smallest 
-            #vat vercentage value hier and subtract the diff
+            #the diff is equal the tolerance or is positive. taking now the smallest 
+            #vat vercentage value here and subtract the diff
             @rate_hash[min_p] = (@rate_hash[min_p] - diff).round(6)
           end
           diff = calc_diff.call
