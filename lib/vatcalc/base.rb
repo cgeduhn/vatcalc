@@ -27,7 +27,7 @@ module Vatcalc
 
       arr = (@grouped_elements[obj.vat_percentage] ||= [])
       arr.fill(obj, arr.size, quantity)
-      @total += (obj.to_gnv * quantity)
+      @total += (obj * quantity)
 
       @rates = nil
       self

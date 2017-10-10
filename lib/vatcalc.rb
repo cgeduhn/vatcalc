@@ -9,6 +9,7 @@ require "vatcalc/gnv"
 require "vatcalc/base_element"
 require "vatcalc/base"
 require "vatcalc/service"
+require "vatcalc/bill"
 
 module Vatcalc
   mattr_accessor :currency

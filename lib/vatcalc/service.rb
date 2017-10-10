@@ -16,12 +16,7 @@ module Vatcalc
     end
 
     def base=(b)
-      case b 
-      when Base
-        @base = b
-      when BaseElement
-        @base = b.to_base
-      end
+      @base = b if b.is_a? Base
     end
 
     # Allocates money between different parties without losing pennies.
@@ -39,8 +34,7 @@ module Vatcalc
     #
     def net_splitted
       h = Hash.new
-      sr = sorted_rates
-      @gross.allocate(sr.values).each_with_index do |money,i|
+      @gross.allocate(rates.values).each_with_index do |money,i|
         (vat_percentage = sr[i])
         net_v = (money / vat_percentage)
         vat_v = @gross - net_v 
@@ -50,6 +44,11 @@ module Vatcalc
     def vat_splitted
       @gross - net
     end
+
+    private 
+    
+      def splitted_hash
+      end
 
 
   end
