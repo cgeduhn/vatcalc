@@ -37,7 +37,7 @@ module Vatcalc
 
       @total ? @total += gnv : @total = gnv
 
-      rates!
+      rates! #recalculate the rates
 
       self
     end
@@ -48,6 +48,10 @@ module Vatcalc
 
     def each
       @elements.each { |elem,quantity| yield elem, quantity }
+    end
+
+    def each_vat_percentage
+      @grouped_amounts.each {|vp,gnv| yield vp, rates[vp], gnv.vat, gnv.net, gnv.gross }
     end
 
     delegate :gross,:net,:vat,:curr,:currency, to: :@total
