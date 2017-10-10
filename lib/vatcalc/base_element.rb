@@ -40,10 +40,6 @@ module Vatcalc
     #TODO delegate + and - to: to_base 
     delegate :+,:-,:*, to: :to_gnv
 
-    def to_base(quantity=1)
-      Base.new.insert(self,quantity)
-    end
-
     def hash
       #vector comes from GNV
       [@vector,@vat_percentage].hash

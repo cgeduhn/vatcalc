@@ -12,19 +12,20 @@ module Vatcalc
 
     def initialize()
       @base = Base.new
-      @services = []
+      @services = Hash.new(0)
     end
 
     def insert(obj,quantity=1)
       case oth
       when Service
-        v = @vector.send(m_name,oth)
-      else
+        @services[obj] += 1
+      when BaseElement
         @base.insert(obj,quantity)
+      else 
+        # TODO definie if obj respond_to_ acts_as_vat_service or acts_as_base_element ? 
       end
+      return self
     end
-
-
 
 
   end

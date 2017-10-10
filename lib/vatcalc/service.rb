@@ -23,6 +23,12 @@ module Vatcalc
     end
 
     def base=(b)
+      if b.is_a? Base
+        @vat_splitted = nil
+        @base = b
+      else
+        nil
+      end
       @base = b if b.is_a? Base
     end
 
