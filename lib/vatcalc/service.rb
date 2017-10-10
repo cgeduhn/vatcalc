@@ -19,6 +19,17 @@ module Vatcalc
       @base = b if b.is_a? Base
     end
 
+
+    def net
+
+    end
+
+    def vat
+      @gross - net
+    end
+
+
+
     # Allocates money between different parties without losing pennies.
     # After the mathematical split has been performed, leftover pennies will
     # be distributed round-robin amongst the parties. This means that parties
@@ -32,14 +43,8 @@ module Vatcalc
     #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
     #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
     #
-    def net
-      base.each_vat_rate do |vp, rate|
-        
-      end
-    end
-
-    def vat
-      @gross - net
+    def gross_splitted
+      
     end
 
 

@@ -184,7 +184,7 @@ RSpec.describe Vatcalc::Base do
 
   it "has correctly rates if net is 0" do
     b << [0,0.00]
-    expect(b[0.00].to_f).to eq(1.00)
+    expect(b[0.00].gross.to_f).to eq(0.00)
     expect(b.percentages).to eq([Vatcalc::VATPercentage.new(0.00)])
     expect(b.rates).to eq({Vatcalc::VATPercentage.new(0.00) => 1.00})
   end
@@ -220,7 +220,7 @@ RSpec.describe Vatcalc::Base do
       vs = b.rates.values.collect{|s| (s*100).round(2)}
       rounded_sum = vs.inject(0){|s,i| s+=i}.round(4)
       # p "---#{b.rates}"
-      # p "#{b.human_rates}"
+      #p "#{b.human_rates}"
       expect(rounded_sum).to eq(100)
     end
 

@@ -5,6 +5,7 @@ module Vatcalc
     def initialize()
       @grouped_amounts = {}
       @elements = Hash.new(0)
+      @rates_changed = true
     end
 
     def <<(obj)
@@ -35,7 +36,7 @@ module Vatcalc
 
       @total ? @total += gnv : @total = gnv
 
-      rates! #recalculate the rates
+      @rates_changed = true
 
       self
     end
@@ -48,10 +49,6 @@ module Vatcalc
       @elements.each { |elem, quantity| (yield elem, quantity) if block_given? }
     end
 
-    def each_vat_rate
-      @grouped_amounts.each { |vp, gnv| yield vp, rates[vp], gnv.vat }
-    end
-
     delegate :gross,:net,:vat,:curr,:currency, to: :@total
 
     def vat_percentages
@@ -62,7 +59,7 @@ module Vatcalc
     alias :percentages :vat_percentages
 
     alias :each_elem :each_element_with_quantity
-    alias :each_rate :each_vat_rate
+    alias :each_element :each_element_with_quantity
 
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 
@@ -78,25 +75,26 @@ module Vatcalc
     # "{1.0=>0.2475, 1.19=>0.3371, 1.07=>0.4154}"
     # "{1.0=>0.1739, 1.19=>0.5261, 1.07=>0.3}"
     def rates
-      @rates || rates!
+      rates_changed? && @rates ? @rates : rates!
     end
 
     #@see +rates+
     def rates!
       max_p = vat_percentages.max
-      rate_hash = Hash.new(0.00)
+      @rate_hash = Hash.new(0.00)
       if net != 0 
-        @grouped_amounts.each { |(vp,gnv)| rate_hash[vp] = (gnv.net/net).round(4) }
+        @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = (gnv.net/net).round(4) }
         #it can be that there is a small difference.
         #so it should be corrected her
-        if diff = 1.00 - rate_hash.values.sum.round(4)
-          rate_hash[max_p] = (rate_hash[max_p] + diff).round(4)
+        if diff = 1.00 - @rate_hash.values.sum.round(4)
+          @rate_hash[max_p] = (@rate_hash[max_p] + diff).round(4)
         end
       else
-        rate_hash = @grouped_amounts.each { |(vp,gnv)| rate_hash[vp] = 0.00 }
-        rate_hash[max_p] = 1.00 if max_p
+        @rate_hash = @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = 0.00 }
+        @rate_hash[max_p] = 1.00 if max_p
       end
-      @rates = rate_hash
+      @rates_changed = false
+      @rate_hash
     end
 
     alias :vat_rates :rates
@@ -114,6 +112,11 @@ module Vatcalc
     def human_rates
       #example ((1.19 - 1.00)*100).round(2) => 19.0
       rates.inject({}){|h,(pr,v)| h[((pr.to_f-1.00)*100).round(2)] = (v*100).round(2); h}
+    end
+
+
+    def rates_changed?
+      !!@rates_changed
     end
 
 
