@@ -92,7 +92,7 @@ module Vatcalc
         diff = calc_diff.call
         l = @rate_hash.length
         tolerance = BigDecimal("1E-5")
-        # the diff has to be negative not over 1.00 and the absolut value has to be smaler than the tolerance 
+        # the diff has to be negative so not over 1.00 and the absolut value has to be smaler than the tolerance 
         while diff.positive? || diff.abs >= tolerance
           # if diff is bigger than the tolerance it has to be distributed over all vat_percentage rates
           if diff.abs > tolerance
@@ -105,8 +105,6 @@ module Vatcalc
           end
           diff = calc_diff.call
         end
-        
-
       else
         @rate_hash = @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = 0.00 }
         @rate_hash[max_p] = 1.00 if max_p

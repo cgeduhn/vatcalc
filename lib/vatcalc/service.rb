@@ -4,7 +4,6 @@ module Vatcalc
 
     attr_reader :gross
     def initialize(amount,options={})
-      opt = options.to_h
       self.base = options[:base]
       @gross = Util.convert_to_money( amount || 0, currency )
     end
@@ -30,7 +29,7 @@ module Vatcalc
 
     def vat_splitted
       return @vat_splitted if !rates_changed? && @vat_splitted
-      @vat_splitted = gross_allocated.inject({}) do |h,(vp,money)|
+      @vat_splitted = allocate(@gross).inject({}) do |h,(vp,money)|
         h[vp] = money - (money / vp)
         h
       end
@@ -53,8 +52,8 @@ module Vatcalc
     #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
     #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
     #
-    def gross_allocated
-      rates.keys.zip(@gross.allocate(rates.values)).to_h
+    def allocate(amount)
+      rates.keys.zip(amount.allocate(rates.values)).to_h
     end
 
 

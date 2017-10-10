@@ -7,7 +7,7 @@ module Vatcalc
 
     attr_accessor :base,:total,:services
 
-    [:base=,:total=,:services=].each {|i| private i}
+    [:base=,:services=].each {|i| private i}
 
 
     def initialize()
@@ -22,12 +22,6 @@ module Vatcalc
       else
         @base.insert(obj,quantity)
       end
-    end
-
-
-    #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
-    def coerce(oth)
-      [self,oth]
     end
 
 

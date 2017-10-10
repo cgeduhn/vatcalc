@@ -76,7 +76,7 @@ RSpec.describe Vatcalc::Service do
     let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
 
     it "has correctly net" do
-      expect(s.gross_allocated.values).to eq(m)
+      expect(s.allocate(Money.euro(-3*100)).values).to eq(m)
       expect(s.net).to eq(expected_net)
     end
 
