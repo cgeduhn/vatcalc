@@ -2,8 +2,6 @@
 module Vatcalc    
   class Base 
 
-    include Enumerable
-
     def initialize()
       @grouped_amounts = {}
       @elements = Hash.new(0)
@@ -46,12 +44,12 @@ module Vatcalc
       @grouped_amounts[(arg.is_a?(VATPercentage) ? arg : VATPercentage.new(arg))]
     end
 
-    def each
-      @elements.each { |elem,quantity| yield elem, quantity }
+    def each_element_with_quantity
+      @elements.each { |elem, quantity| (yield elem, quantity) if block_given? }
     end
 
-    def each_vat_percentage
-      @grouped_amounts.each {|vp,gnv| yield vp, rates[vp], gnv.vat, gnv.net, gnv.gross }
+    def each_vat_rate
+      @grouped_amounts.each { |vp, gnv| yield vp, rates[vp], gnv.gross, gnv.net, gnv.vat }
     end
 
     delegate :gross,:net,:vat,:curr,:currency, to: :@total
@@ -60,11 +58,11 @@ module Vatcalc
       @grouped_amounts.keys
     end
 
-
-    alias :collection :to_a
-
     alias :add :insert
     alias :percentages :vat_percentages
+
+    alias :each_elem :each_element_with_quantity
+    alias :each_rate :each_vat_rate
 
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 

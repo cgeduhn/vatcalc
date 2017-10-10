@@ -32,23 +32,15 @@ module Vatcalc
     #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
     #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
     #
-    def net_splitted
-      h = Hash.new
-      @gross.allocate(rates.values).each_with_index do |money,i|
-        (vat_percentage = sr[i])
-        net_v = (money / vat_percentage)
-        vat_v = @gross - net_v 
+    def net
+      base.each_vat_rate do |vp, rate|
+        
       end
     end
 
-    def vat_splitted
+    def vat
       @gross - net
     end
-
-    private 
-    
-      def splitted_hash
-      end
 
 
   end

@@ -166,10 +166,10 @@ RSpec.describe Vatcalc::Base do
   let (:b) {Vatcalc::Base.new}
   it "inserts anything correctly" do
     b << ([100.00, 7])
-    expect(b.collection.length).to eq(1)
+    expect(b.each_elem.length).to eq(1)
 
     b << ([100])
-    expect(b.collection.length).to eq(2)
+    expect(b.each_elem.length).to eq(2)
 
     expect(b.gross.to_f).to eq(101.00)
 
