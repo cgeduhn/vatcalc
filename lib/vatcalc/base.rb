@@ -74,7 +74,7 @@ module Vatcalc
     # "{1.0=>0.2475, 1.19=>0.3371, 1.07=>0.4154}"
     # "{1.0=>0.1739, 1.19=>0.5261, 1.07=>0.3}"
     def rates
-      rates_changed? && @rates ? @rates : rates!
+      !rates_changed? && @rates ? @rates : rates!
     end
 
     #@see +rates+

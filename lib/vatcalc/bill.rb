@@ -3,15 +3,15 @@ module Vatcalc
 
     include Comparable
 
+    delegate :rates,:rates_changed?,:currency,:vat_percentages, to: :base
 
     attr_accessor :base,:total,:services
 
     [:base=,:total=,:services=].each {|i| private i}
 
 
-    def initialize(currency=nil)
+    def initialize()
       @base = Base.new
-      @total = GNV.new(0,0,currency)
       @services = []
     end
 
@@ -23,7 +23,7 @@ module Vatcalc
         @base.insert(obj,quantity)
       end
     end
-    
+
 
     #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
     def coerce(oth)
