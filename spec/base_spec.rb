@@ -55,11 +55,10 @@ RSpec.describe Vatcalc::Base do
       b << [r.call,0.00]
       b.insert [r.call,19], 5
       b << [r.call,7]
-      vs = b.rates.values.collect{|s| (s*100).round(2)}
-      rounded_sum = vs.inject(0){|s,i| s+=i}.round(4)
-      # p "---#{b.rates}"
-      #p "#{b.human_rates}"
-      expect(rounded_sum).to eq(100)
+      p "#{b.human_rates}"
+
+      d = (b.rates.values.sum.to_d)
+      expect(d.to_f.round(5)).to eq(1.00)
     end
 
 

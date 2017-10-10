@@ -80,14 +80,33 @@ module Vatcalc
     #@see +rates+
     def rates!
       max_p = vat_percentages.max
+      min_p = vat_percentages.min
       @rate_hash = Hash.new(0.00)
       if net != 0 
-        @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = (gnv.net/net).round(4) }
+        
+        @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = (gnv.net/net).round(6) }
         #it can be that there is a small difference.
-        #so it should be corrected her
-        if diff = 1.00 - @rate_hash.values.sum.round(4)
-          @rate_hash[max_p] = (@rate_hash[max_p] + diff).round(4)
+        #so it should be corrected here
+
+        calc_diff = ->{ @rate_hash.values.sum.round(6) - 1.00 }
+        diff = calc_diff.call
+        l = @rate_hash.length
+        tolerance = BigDecimal("1E-5")
+        # the diff has to be negative not over 1.00 and the absolut value has to be smaler than the tolerance 
+        while diff.positive? || diff.abs >= tolerance
+          # if diff is bigger than the tolerance it has to be distributed over all vat_percentage rates
+          if diff.abs > tolerance
+            eps = (diff / l) # if if negativ eps will be postive 
+            @rate_hash.each { |k,v| @rate_hash[k] = (eps + v).round(6) }
+          else
+            #the diff is equal the tolerance or is positiv so i take the smallest 
+            #vat vercentage value hier and subtract the diff
+            @rate_hash[min_p] = @rate_hash[min_p] - diff 
+          end
+          diff = calc_diff.call
         end
+        
+
       else
         @rate_hash = @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = 0.00 }
         @rate_hash[max_p] = 1.00 if max_p
@@ -110,7 +129,7 @@ module Vatcalc
     # {0.0=>11.56, 19.0=>10.71, 7.0=>77.73}"
     def human_rates
       #example ((1.19 - 1.00)*100).round(2) => 19.0
-      rates.inject({}){|h,(pr,v)| h[((pr.to_f-1.00)*100).round(2)] = (v*100).round(2); h}
+      rates.inject({}){|h,(pr,v)| h[((pr.to_f-1.00)*100).round(2)] = (v*100).round(4); h}
     end
 
 

@@ -1,11 +1,6 @@
 require "spec_helper"
 
 RSpec.describe Vatcalc::BaseElement do
-  it "has a version number" do
-    expect(Vatcalc::VERSION).not_to be nil
-  end
-
-
 
   describe "with amount of 100" do 
     

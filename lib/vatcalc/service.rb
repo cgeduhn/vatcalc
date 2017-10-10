@@ -46,7 +46,7 @@ module Vatcalc
       #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
       #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
       #
-      @vat_splitted = (rates.keys.zip *@gross.allocate(rates.values)).inject({}) do |h,(vp,money)|
+      @vat_splitted = rates.keys.zip(@gross.allocate(rates.values)).inject({}) do |h,(vp,money)|
         h[vp] = money - (money / vp)
         h
       end
