@@ -4,7 +4,7 @@ module Vatcalc
 
     def initialize()
       @grouped_elements = {}
-      @gnv = GNV.new(0,0)
+      @total = GNV.new(0,0)
     end
 
     def <<(obj)
@@ -25,18 +25,15 @@ module Vatcalc
         raise TypeError.new "#{obj} can't be converted into a BaseElement"
       end
 
-      # quantity.times do 
-      #   (@grouped_elements[obj.vat_percentage] ||= []) << obj
-      # end
       arr = (@grouped_elements[obj.vat_percentage] ||= [])
       arr.fill(obj, arr.size, quantity)
-      @gnv += (obj.to_gnv * quantity)
+      @total += (obj.to_gnv * quantity)
 
       @rates = nil
       self
     end
 
-    delegate :gross,:net,:vat,:curr,:currency, to: :@gnv
+    delegate :gross,:net,:vat,:curr,:currency, to: :@total
 
     def vat_percentages
       @grouped_elements.keys
