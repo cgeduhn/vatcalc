@@ -29,12 +29,11 @@ module Vatcalc
 
     def vat_splitted
       return @vat_splitted if !rates_changed? && @vat_splitted
-      @vat_splitted = allocate(@gross).inject({}) do |h,(vp,money)|
-        h[vp] = money - (money / vp)
+      @vat_splitted = allocate(@gross).inject({}) do |h,(vp,splitted_money)|
+        h[vp] = splitted_money - (splitted_money / vp)
         h
       end
     end
-
 
     # Using the allocate function of the Money gem here.
     # EXPLANATION FROM MONEY GEM: 
