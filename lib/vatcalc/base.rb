@@ -49,7 +49,7 @@ module Vatcalc
     end
 
     def each_vat_rate
-      @grouped_amounts.each { |vp, gnv| yield vp, rates[vp], gnv.gross, gnv.net, gnv.vat }
+      @grouped_amounts.each { |vp, gnv| yield vp, rates[vp], gnv.vat }
     end
 
     delegate :gross,:net,:vat,:curr,:currency, to: :@total
