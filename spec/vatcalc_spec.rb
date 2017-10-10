@@ -149,16 +149,6 @@ RSpec.describe Vatcalc::BaseElement do
       expect(result.vat.to_f).to eq(6.08)
     end
 
-
-    it "can add an object with quantity 10" do 
-      obj1 = Vatcalc::BaseElement.new(10.00,vat_percentage: 19)
-      result = Vatcalc::Base.new.insert(obj1,10)
-
-      expect(result.gross.to_f).to eq(100.00)
-      expect(result.net.to_f).to eq(84.00)
-      expect(result.vat.to_f).to eq(16.00)
-    end
-
   end
 
 
@@ -192,12 +182,33 @@ RSpec.describe Vatcalc::Base do
     expect(b.rates).to eq({Vatcalc::VATPercentage.new(0.00) => 1.00})
   end
 
+
+  it "can add an object with quantity 10" do 
+    obj1 = Vatcalc::BaseElement.new(10.00,vat_percentage: 19)
+    result = Vatcalc::Base.new.insert(obj1,10)
+
+    expect(result.gross.to_f).to eq(100.00)
+    expect(result.net.to_f).to eq(84.00)
+    expect(result.vat.to_f).to eq(16.00)
+  end
+
+
+  it "can add an object with quantity 100" do 
+    obj1 = Vatcalc::BaseElement.new(5.5,vat_percentage: 19)
+    result = Vatcalc::Base.new.insert(obj1,100)
+
+    expect(result.gross.to_f).to eq(550.00)
+    expect(result.net.to_f).to eq(462.00)
+    expect(result.vat.to_f).to eq(88.00)
+  end
+
   it "has correctly rates" do
     r = Proc.new{|it| rand(100000).to_f * (rand*100)}
-    1000.times do |i|
+    100.times do |i|
       b = Vatcalc::Base.new
+      b.insert [r.call,0.00], 2
       b << [r.call,0.00]
-      b << [r.call,19]
+      b.insert [r.call,19], 5
       b << [r.call,7]
       vs = b.rates.values.collect{|s| (s*100).round(2)}
       rounded_sum = vs.inject(0){|s,i| s+=i}.round(4)

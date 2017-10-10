@@ -27,7 +27,7 @@ module Vatcalc
       raise ArgumentError.new "gross: #{gross.to_f} must >= net: #{net.to_f}" if self.gross.abs < self.net.abs
     end
 
-    [:+,:-].each do |m_name|
+    [:+,:-,:*].each do |m_name|
       define_method(m_name) do |oth|
         case oth
         when GNV

@@ -2,7 +2,6 @@
 module Vatcalc    
   class Base 
 
-    attr_reader :currency
     def initialize()
       @grouped_elements = {}
       @gnv = GNV.new(0,0)
@@ -17,20 +16,22 @@ module Vatcalc
       when BaseElement
         obj
       when Numeric,Money
-        BaseElement.new(obj)
+        BaseElement.new(obj,currency: currency)
       when Hash
-        BaseElement.new(obj[:amount] || obj[:gross] || obj[:value],obj)
+        BaseElement.new(obj[:amount] || obj[:gross] || obj[:value],obj.tap{|h| h[:currency] ||= currency})
       when Array
         BaseElement.new(obj[0], percentage: obj[1],currency: obj[2])
       else
         raise TypeError.new "#{obj} can't be converted into a BaseElement"
       end
 
-      quantity.times do 
-        obj_dup = obj.dup
-        (@grouped_elements[obj.vat_percentage] ||= []) << obj_dup
-        @gnv += obj_dup.to_gnv
-      end
+      # quantity.times do 
+      #   (@grouped_elements[obj.vat_percentage] ||= []) << obj
+      # end
+      arr = (@grouped_elements[obj.vat_percentage] ||= [])
+      arr.fill(obj, arr.size, quantity)
+      @gnv += (obj.to_gnv * quantity)
+
       @rates = nil
       self
     end
@@ -83,6 +84,8 @@ module Vatcalc
       end
       @rates = rate_hash
     end
+
+    alias :vat_rates :rates
 
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate in decimal form
