@@ -65,6 +65,17 @@ module Vatcalc
       @vector[1]
     end
 
+    # Returns a Integer hash value based on the +value+
+    # in order to use functions like & (intersection), group_by, etc.
+    #
+    # @return [Integer]
+    #
+    # @example
+    #   GNV.new(19,11).hash #=> 908351
+    def hash
+      @vector.hash
+    end
+
     #Always gross - net
     def vat
       gross - net

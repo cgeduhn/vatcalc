@@ -2,11 +2,11 @@
 module Vatcalc    
   class Base 
 
-    attr_reader :elements
+    include Enumerable
+
     def initialize()
       @grouped_amounts = {}
-      @elements = []
-      @total = GNV.new(0,0)
+      @elements = Hash.new(0)
     end
 
     def <<(obj)
@@ -26,14 +26,16 @@ module Vatcalc
       else
         raise TypeError.new "#{obj} can't be converted into a BaseElement"
       end
-
+      #building a abstract gnv object thats responds_to gross, net, vat
       gnv = (obj * quantity)
 
+      #add or set gnv to the vat_percentage key
       @grouped_amounts[obj.vat_percentage] ? @grouped_amounts[obj.vat_percentage] += gnv : @grouped_amounts[obj.vat_percentage] = gnv
 
-      @elements.fill(obj, @elements.size, quantity) 
+      #put quantity times the object in the elements array
+      @elements[obj] += quantity
 
-      @total += gnv
+      @total ? @total += gnv : @total = gnv
 
       rates!
 
@@ -41,7 +43,11 @@ module Vatcalc
     end
 
     def [](arg)
-      @grouped_amounts[(arg.is_a?(VATPervcentage) ? arg : VATPercentage.new(arg))]
+      @grouped_amounts[(arg.is_a?(VATPercentage) ? arg : VATPercentage.new(arg))]
+    end
+
+    def each
+      @elements.each { |elem,quantity| yield elem, quantity }
     end
 
     delegate :gross,:net,:vat,:curr,:currency, to: :@total
@@ -51,7 +57,7 @@ module Vatcalc
     end
 
 
-    alias :collection :elements
+    alias :collection :to_a
 
     alias :add :insert
     alias :percentages :vat_percentages
@@ -109,6 +115,10 @@ module Vatcalc
     end
 
 
+    private 
+      def total
+        @total || GNV.new(0,0)
+      end
 
   end
 end

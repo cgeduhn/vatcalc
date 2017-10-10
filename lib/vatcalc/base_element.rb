@@ -44,6 +44,11 @@ module Vatcalc
       Base.new.insert(self,quantity)
     end
 
+    def hash
+      #vector comes from GNV
+      [@vector,@vat_percentage].hash
+    end
+
 
     def inspect
       "#<#{self.class.name} vat_percentage:#{vat_percentage} gross:#{gross} net: #{net} vat:#{vat} >"
