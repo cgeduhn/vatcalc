@@ -75,7 +75,7 @@ module Vatcalc
     # @example
     #   VATPercentage.new(19).hash #=> 908351
     def hash
-      [@value,self.class.name].hash
+      [@value,self.class].hash
     end
 
 

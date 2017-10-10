@@ -19,6 +19,13 @@ RSpec.describe Vatcalc::VATPercentage do
     expect(perc.new(0.00).to_f).to eq(1.00)
 
     expect(Vatcalc.percentage.to_f).to eq(1.19)
+
+
+    h = Hash.new
+    h[perc.new(19)] = 1
+    
+    expect(h.has_key? perc.new(19)   ).to eq(true)
+    expect(h.has_key? perc.new(0.19) ).to eq(true)
   end
 
   it "compares correctly" do
