@@ -101,7 +101,7 @@ module Vatcalc
           else
             #the diff is equal the tolerance or is positiv so i take the smallest 
             #vat vercentage value hier and subtract the diff
-            @rate_hash[min_p] = @rate_hash[min_p] - diff 
+            @rate_hash[min_p] = (@rate_hash[min_p] - diff).round(6)
           end
           diff = calc_diff.call
         end

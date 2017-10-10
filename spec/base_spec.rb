@@ -55,7 +55,7 @@ RSpec.describe Vatcalc::Base do
       b << [r.call,0.00]
       b.insert [r.call,19], 5
       b << [r.call,7]
-      p "#{b.human_rates}"
+      #p "#{b.human_rates}"
 
       d = (b.rates.values.sum.to_d)
       expect(d.to_f.round(5)).to eq(1.00)

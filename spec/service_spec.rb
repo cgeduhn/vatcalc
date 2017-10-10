@@ -69,12 +69,15 @@ RSpec.describe Vatcalc::Service do
 
 
     #Coupon 10%
-    let (:s) {Vatcalc::Service.new(-3,base: b)}
+    let (:s) {Vatcalc::Service.new(-3.00,base: b)}
 
-    let (:expected_net) { -3*100 * (0.302667/1.19 + 0.336941/1.107 + 0.360390) }
+    let (:m) { Money.euro(-3*100).allocate([0.30267,0.336941,0.360389]) }
+
+    let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
 
     it "has correctly net" do
-      expect(s.net).to eq(Money.euro(expected_net))
+      expect(s.gross_allocated.values).to eq(m)
+      expect(s.net).to eq(expected_net)
     end
 
     # it "has correctly vat" do
