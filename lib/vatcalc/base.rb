@@ -23,7 +23,7 @@ module Vatcalc
       when Array
         BaseElement.new(obj[0], percentage: obj[1],currency: obj[2])
       else
-        raise ArgumentError.new "#{obj} can't be converted into an #{self}"
+        raise TypeError.new "#{obj} can't be converted into a BaseElement"
       end
 
       quantity.times do 
