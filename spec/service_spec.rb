@@ -1,7 +1,7 @@
 require "spec_helper"
 
-RSpec.describe Vatcalc::Service do 
-  let (:s) {Vatcalc::Service}
+RSpec.describe Vatcalc::ServiceElement do 
+  let (:s) {Vatcalc::ServiceElement}
   let (:b) {Vatcalc::Base.new}
 
 
@@ -10,7 +10,7 @@ RSpec.describe Vatcalc::Service do
     let (:b) {Vatcalc::Base.new.insert(elem)}
 
 
-    let (:s) {Vatcalc::Service.new(5.00,base: b)}
+    let (:s) {Vatcalc::ServiceElement.new(5.00,base: b)}
 
     it "has correctly net" do
       expect(s.net.to_f).to eq(4.2)
@@ -32,7 +32,7 @@ RSpec.describe Vatcalc::Service do
 
     let (:b) {a = Vatcalc::Base.new.insert(elem1); a.insert(elem2)}
 
-    let (:s) {Vatcalc::Service.new(5.00,base: b)}
+    let (:s) {Vatcalc::ServiceElement.new(5.00,base: b)}
 
     it "has correctly net" do
       expect(s.net).to eq(Money.euro(2.1*100 + 2.34*100))
@@ -69,7 +69,7 @@ RSpec.describe Vatcalc::Service do
 
 
     #Coupon 10%
-    let (:s) {Vatcalc::Service.new(-3.00,base: b)}
+    let (:s) {Vatcalc::ServiceElement.new(-3.00,base: b)}
 
     let (:m) { Money.euro(-3*100).allocate([0.30267,0.336941,0.360389]) }
 

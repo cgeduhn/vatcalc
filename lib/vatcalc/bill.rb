@@ -21,7 +21,7 @@ module Vatcalc
 
     def insert(obj,quantity=1)
       case oth
-      when Service
+      when ServiceElement
         @services.insert(obj,@services.size,quantity)
       when BaseElement
         @base.insert(obj,quantity)
