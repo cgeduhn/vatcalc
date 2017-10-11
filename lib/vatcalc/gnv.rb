@@ -40,13 +40,13 @@ module Vatcalc
         else
           raise TypeError.new "#{oth.class} can't be coerced into #{self.class}"
         end
-        self.class.init_by_vector(v)
+        to_gnv(v)
       end
     end
 
     #For usage of => - GNV.new(100.00,90.00)
     def -@
-      self.class.init_by_vector(-@vector)
+      to_gnv(-@vector)
     end
 
     #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
@@ -78,13 +78,8 @@ module Vatcalc
       gross - net
     end
 
-    def to_gnv
-      GNV.init_by_vector(@vector)
-    end
-
-    private 
-    def self.init_by_vector(v)
-      new(v[0],v[1],@currency)
+    def to_gnv(v=@vector)
+      GNV.new(v[0],v[1],@currency)
     end
 
 
