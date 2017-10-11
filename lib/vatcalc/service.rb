@@ -41,6 +41,11 @@ module Vatcalc
       end
     end
 
+    def rates_changed!
+      @vat_splitted = nil
+      
+    end
+
     # Using the allocate function of the Money gem here.
     # EXPLANATION FROM MONEY GEM: 
     #

@@ -10,9 +10,7 @@ module Vatcalc
     end
 
     def insert(obj, quantity = 1)
-      #building a abstract gnv object thats responds_to gross, net, vat
-      obj = obj_to_base_element(obj)
-     
+      #building a abstract gnv object thats responds_to gross, net, vat     
       if quantity != 0 && quantity.is_a?(Fixnum)
         obj = obj_to_base_element(obj)
         gnv = (quantity == 1 ? obj.to_gnv : (obj * quantity))
