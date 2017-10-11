@@ -134,6 +134,33 @@ module Vatcalc
       @rates.nil?
     end
 
+
+    # Allocates a amount to the vat_percentage rates
+    # @return [Hash]
+    # @example
+    #   Vatcalc::Base.allocate(100.00) 
+    #   => {1.19 => #<Money fractional:50 currency:EUR>, 1.07 => #<Money fractional:50 currency:EUR>}
+    #
+    # Using basically the allocate function of the Money gem here.
+    # EXPLANATION FROM MONEY GEM: 
+    #
+    # Allocates money between different parties without losing pennies.
+    # After the mathematical split has been performed, leftover pennies will
+    # be distributed round-robin amongst the parties. This means that parties
+    # listed first will likely receive more pennies than ones that are listed later
+    
+    # @param [Array<Numeric>] splits [0.50, 0.25, 0.25] to give 50% of the cash to party1, 25% to party2, and 25% to party3.
+    
+    # @return [Array<Money>]
+    
+    # @example
+    #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
+    #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
+    #
+    def allocate(amount)
+      rates.keys.zip(Util.conv_to_money(amount).allocate(rates.values)).to_h
+    end
+
     alias_method :<<, :insert
     alias_method :>>, :remove
     alias_method :add, :insert
