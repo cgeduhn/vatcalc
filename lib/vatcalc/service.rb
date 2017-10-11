@@ -1,45 +1,29 @@
 module Vatcalc
-  class Service
+  class Service < GNV
 
 
-    attr_reader :gross
+    attr_reader :vat_splitted
+
     def initialize(amount,options={})
-      self.base = options[:base]
-      @gross = Util.convert_to_money( amount || 0, currency )
-    end
+      @base = options.fetch(:base,Base.new)
 
-    delegate :rates,:rates_changed?,:currency,:vat_percentages,:allocate, to: :base
+      calculate_splitted_values(amount)
 
-    def net
-      @gross - vat
-    end
-
-    def vat
-      vat_splitted.values.sum
-    end
-
-    def base
-      @base || Base.new
-    end
-
-    def base=(b)
-      if b.is_a? Base
-        @vat_splitted = nil
-        @base = b
-      else
-        nil
-      end
-      @base = b if b.is_a? Base
+      super amount, @net_splitted.values.sum , @base.currency
     end
 
 
-    def vat_splitted
-      return @vat_splitted if !rates_changed? && @vat_splitted
-      @vat_splitted = allocate(@gross).inject({}) do |h,(vp,splitted_money)|
-        h[vp] = splitted_money - (splitted_money / vp)
-        h
+    def calculate_splitted_values(amount=nil)
+      @gross_splitted = @base.allocate(amount || self.gross)
+      @vat_splitted = {}
+      @net_splitted = {}
+
+      @gross_splitted.each do |vp,splitted_gross|
+        @net_splitted[vp] = splitted_gross / vp
+        @vat_splitted[vp] = splitted_gross - @net_splitted[vp] 
       end
     end
+
 
 
   end
