@@ -158,7 +158,7 @@ module Vatcalc
     #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
     #
     def allocate(amount)
-      rates.keys.zip(Util.conv_to_money(amount).allocate(rates.values)).to_h
+      rates.keys.zip(Util.conv_to_m(amount).allocate(rates.values)).to_h
     end
 
     alias_method :<<, :insert
