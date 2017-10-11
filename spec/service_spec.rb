@@ -10,7 +10,7 @@ RSpec.describe Vatcalc::ServiceElement do
     let (:b) {Vatcalc::Base.new.insert(elem)}
 
 
-    let (:s) {Vatcalc::ServiceElement.new(5.00,base: b)}
+    let (:s) {Vatcalc::ServiceElement.new(5.00,b.rates)}
 
     it "has correctly net" do
       expect(s.net.to_f).to eq(4.2)
@@ -32,7 +32,7 @@ RSpec.describe Vatcalc::ServiceElement do
 
     let (:b) {a = Vatcalc::Base.new.insert(elem1); a.insert(elem2)}
 
-    let (:s) {Vatcalc::ServiceElement.new(5.00,base: b)}
+    let (:s) {Vatcalc::ServiceElement.new(5.00,b.rates)}
 
     it "has correctly net" do
       expect(s.net).to eq(Money.euro(2.1*100 + 2.34*100))
@@ -69,14 +69,13 @@ RSpec.describe Vatcalc::ServiceElement do
 
 
     #Coupon 10%
-    let (:s) {Vatcalc::ServiceElement.new(-3.00,base: b)}
+    let (:s) {Vatcalc::ServiceElement.new(-3.00,b.rates)}
 
     let (:m) { Money.euro(-3*100).allocate([0.30267,0.336941,0.360389]) }
 
     let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
 
     it "has correctly net" do
-      expect(b.allocate(Money.euro(-3*100)).values).to eq(m)
       expect(s.net).to eq(expected_net)
     end
 
