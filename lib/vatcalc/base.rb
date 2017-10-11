@@ -28,7 +28,7 @@ module Vatcalc
       gnv = (obj * quantity)
 
       #add or set gnv to the vat_percentage key
-      @grouped_amounts[obj.vat_percentage] ? @grouped_amounts[obj.vat_percentage] += gnv : @grouped_amounts[obj.vat_percentage] = gnv
+      @grouped_amounts[obj.vat_p] ? @grouped_amounts[obj.vat_p] += gnv : @grouped_amounts[obj.vat_p] = gnv
 
       #put quantity times the object in the elements array
       @elements[obj] += quantity
@@ -133,16 +133,13 @@ module Vatcalc
 
 
     def rates_changed?
-      !!@rates_changed
+      @rates.nil?
     end
 
     def rates_changed!
       @rates = nil
       @total = nil
     end
-
-
-
 
     private 
 
