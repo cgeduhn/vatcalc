@@ -41,13 +41,13 @@ module Vatcalc
         new_net = Money.new(0,@currency)
 
         if !arg.empty?
-          @rates = arg 
           arg.keys.zip(gross.allocate(arg.values)).to_h.each do |vp,splitted_gross|
             splitted_net = splitted_gross / vp
             new_net += splitted_net
             v_splitted[vp] = splitted_gross - splitted_net
           end
         end
+
         @vat_splitted = v_splitted
         @vector = Vector[gross,new_net]
         @rates = arg
