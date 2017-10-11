@@ -79,6 +79,9 @@ module Vatcalc
       @rates ||= rates!
     end
 
+
+    RoundPrecision = 4
+    Tolerance = BigDecimal("1E-#{RoundPrecision}")
     #@see +rates+
     def rates!
       max_p = vat_percentages.max
@@ -86,24 +89,23 @@ module Vatcalc
       @rates = Hash.new(0.00)
       if net != 0 
         
-        @grouped_amounts.each { |(vp,gnv)| @rates[vp] = (gnv.net/net).round(6) }
+        @grouped_amounts.each { |(vp,gnv)| @rates[vp] = (gnv.net/net).round(RoundPrecision) }
         #it can be that there is a small difference.
         #so it should be corrected here
 
-        calc_diff = ->{ @rates.values.sum.round(6) - 1.00 }
+        calc_diff = ->{ @rates.values.sum.round(RoundPrecision) - 1.00 }
         diff = calc_diff.call
         l = @rates.length
-        tolerance = BigDecimal("1E-5")
         # the diff has to be negative => not over 1.00 and the absolut value has to be smaler than the tolerance 
-        while diff.positive? || diff.abs >= tolerance
+        while diff.positive? || diff.abs >= Tolerance
           # if diff is bigger than the tolerance it has to be allocated over all vat_percentage rates
-          if diff.abs > tolerance
+          if diff.abs > Tolerance
             eps = (diff / l) # if if negativ eps will be postive 
-            @rates.each { |k,v| @rates[k] = (eps + v).round(6) }
+            @rates.each { |k,v| @rates[k] = (eps + v).round(RoundPrecision) }
           else
             #the diff is equal the tolerance or is positive. taking now the smallest 
             #vat vercentage value here and subtract the diff
-            @rates[min_p] = (@rates[min_p] - diff).round(6)
+            @rates[min_p] = (@rates[min_p] - diff).round(RoundPrecision)
           end
           diff = calc_diff.call
         end
@@ -128,7 +130,7 @@ module Vatcalc
     # {0.0=>11.56, 19.0=>10.71, 7.0=>77.73}"
     def human_rates
       #example ((1.19 - 1.00)*100).round(2) => 19.0
-      rates.inject({}){|h,(pr,v)| h[((pr.to_f-1.00)*100).round(2)] = (v*100).round(4); h}
+      rates.inject({}){|h,(pr,v)| h[((pr.to_f-1.00)*100).round(RoundPrecision-2)] = (v*100).round(RoundPrecision-2); h}
     end
 
 
@@ -140,8 +142,6 @@ module Vatcalc
       @rates = nil
       @total = nil
     end
-
-    private 
 
 
   end

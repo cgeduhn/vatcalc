@@ -57,8 +57,8 @@ RSpec.describe Vatcalc::Base do
       b << [r.call,7]
       #p "#{b.human_rates}"
 
-      d = (b.rates.values.sum.to_d)
-      expect(d.to_f.round(5)).to eq(1.00)
+      d = (b.rates.values.sum.to_d(Vatcalc::Base::RoundPrecision))
+      expect(1.00 - d).to be <= (Vatcalc::Base::Tolerance)
     end
 
 
