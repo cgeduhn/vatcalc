@@ -74,6 +74,14 @@ RSpec.describe Vatcalc::Base do
     expect(result.each_elem.size).to eq(1)
     expect(result.each_elem[0][1]).to eq(50)
 
+
+    result.remove(obj2,51)
+    expect(result.gross.to_f).to eq(0.00)
+    expect(result.net.to_f).to eq(0.00)
+    expect(result.vat.to_f).to eq(0.00)
+
+    expect(result.each_elem.size).to eq(0)
+
   end
 
   it "has correctly rates" do

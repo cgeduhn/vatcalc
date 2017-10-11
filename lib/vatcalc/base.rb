@@ -13,15 +13,21 @@ module Vatcalc
       #building a abstract gnv object thats responds_to gross, net, vat     
       if quantity.to_i != 0
         obj = obj_to_base_element(obj)
-        gnv = (quantity == 1 ? obj.to_gnv : (obj * quantity))
+
         #add or set gnv to the vat_percentage key
+        if quantity > 1
+          gnv = (obj * quantity)
+        elsif quantity == 1
+          gnv = obj.to_gnv
+        else
+          quantity = [quantity,-@elements[obj]].max
+          gnv = (obj * quantity)
+        end
+
         @grouped_amounts[obj.vat_p] ? @grouped_amounts[obj.vat_p] += gnv : @grouped_amounts[obj.vat_p] = gnv
         #put quantity times the object in the elements array
         @elements[obj] += quantity
-
-        if quantity < 0
-          @elements.delete(obj) if @elements[obj] <= 0
-        end
+        @elements.delete(obj) if @elements[obj] <= 0
 
         rates_changed!
       else 
