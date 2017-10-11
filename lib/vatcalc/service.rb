@@ -3,8 +3,8 @@ module Vatcalc
 
 
     attr_reader :gross
-    def initialize(amount,options={})
-      self.base = options[:base]
+    def initialize(amount,base)
+      self.base = base
       @gross = Util.convert_to_money( amount || 0, currency )
     end
 
@@ -29,7 +29,6 @@ module Vatcalc
       else
         nil
       end
-      @base = b if b.is_a? Base
     end
 
 
@@ -40,12 +39,6 @@ module Vatcalc
         h
       end
     end
-
-    def rates_changed!
-      @vat_splitted = nil
-      
-    end
-
     # Using the allocate function of the Money gem here.
     # EXPLANATION FROM MONEY GEM: 
     #

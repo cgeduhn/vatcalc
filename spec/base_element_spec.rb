@@ -57,31 +57,6 @@ RSpec.describe Vatcalc::BaseElement do
     end
   end
 
-  describe "add two base objects" do 
-
-    it "calculates correctly the sum" do 
-      obj1 = Vatcalc::BaseElement.new(50.45,percentage: 0)
-      obj2 = Vatcalc::BaseElement.new(45.45,percentage: 0)
-
-      result = Vatcalc::Base.new << obj1 << obj2
-
-
-      expect(result.gross.to_f).to eq(95.90)
-      expect(result.net.to_f).to eq(95.90)
-      expect(result.vat.to_f).to eq(0)
-
-
-      obj1 = Vatcalc::BaseElement.new(47.47,percentage: 7)
-      obj2 = Vatcalc::BaseElement.new(45.45,percentage: 7)
-
-      result = Vatcalc::Base.new << obj1 << obj2
-
-      expect(result.gross.to_f).to eq(92.92)
-      expect(result.net.to_f).to eq(86.84)
-      expect(result.vat.to_f).to eq(6.08)
-    end
-
-  end
 
 
 end
