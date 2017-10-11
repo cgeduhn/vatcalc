@@ -33,14 +33,12 @@ module Vatcalc
           v = @vector.send(m_name,oth.vector)
         elsif oth.is_a?(Numeric) && m_name == :*
           v = @vector.send(m_name,oth)
-        else
+        elsif oth.respond_to?(:coerce)
           #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
-          if oth.respond_to?(:coerce)
-            a, b = other.coerce(self)
-            return a.send(b)
-          else
-            raise TypeError.new "#{oth.class} can't be coerced into #{self.class}"
-          end
+          a, b = other.coerce(self)
+          return a.send(b)
+        else
+          raise TypeError.new "#{oth.class} can't be coerced into #{self.class}"
         end
         self.class.init_by_vector(v)
       end
