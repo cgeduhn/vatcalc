@@ -7,7 +7,8 @@ module Vatcalc
   class BaseElement < GNV
 
     attr_reader :vat_percentage
-
+    alias_method :percentage, :vat_percentage
+    alias_method :vat_p, :vat_percentage
     #Initalizes a new Object of an BaseElement
     #@param amount = [Money,Numeric]
     #@param options = [Hash]
@@ -35,9 +36,6 @@ module Vatcalc
       end
     end
 
-
-    alias_method :percentage, :vat_percentage
-    alias_method :vat_p, :vat_percentage
     #TODO delegate + and - to: to_base 
     delegate :+,:-,:*, to: :to_gnv
 
@@ -48,7 +46,7 @@ module Vatcalc
 
 
     def inspect
-      "#<#{self.class.name} vat_percentage:#{vat_percentage} gross:#{gross} net: #{net} vat:#{vat} >"
+      "#<#{self.class.name} vat_percentage:#{vat_p} gross:#{gross} net: #{net} vat:#{vat} >"
     end
 
   end

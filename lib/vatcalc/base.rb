@@ -22,7 +22,7 @@ module Vatcalc
         @elements[obj] += quantity
 
         if quantity < 0
-          @elements.delete(obj) unless @elements[obj] >= 0
+          @elements.delete(obj) if @elements[obj] <= 0
         end
 
         rates_changed!
