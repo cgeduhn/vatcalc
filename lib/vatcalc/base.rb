@@ -35,9 +35,6 @@ module Vatcalc
       insert(obj,quantity)
     end
 
-    alias_method :<<, :insert
-    alias_method :>>, :remove
-
     def [](arg)
       @grouped_amounts[VATPercentage.new(arg)]
     end
@@ -46,22 +43,16 @@ module Vatcalc
       @elements.each { |elem, quantity| (yield elem, quantity) if block_given? }
     end
 
+
     def total
       @total ||= @grouped_amounts.values.sum
     end
-
-    
 
     def vat_percentages
       @grouped_amounts.keys
     end
 
-    alias_method :add, :insert
-    alias_method :percentages, :vat_percentages
-
-    alias_method :each_elem, :each_element_with_quantity
-    alias_method :each_element, :each_element_with_quantity
-
+    
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 
     # "{1.0=>0.0092, 1.19=>0.8804, 1.07=>0.1104}"
@@ -116,7 +107,6 @@ module Vatcalc
       @rates
     end
 
-    alias :vat_rates :rates
 
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate in decimal form
@@ -138,10 +128,14 @@ module Vatcalc
       @rates.nil?
     end
 
-    def rates_changed!
-      @rates = nil
-      @total = nil
-    end
+    alias_method :<<, :insert
+    alias_method :>>, :remove
+    alias_method :add, :insert
+    alias_method :percentages, :vat_percentages
+    alias_method :each_elem, :each_element_with_quantity
+    alias_method :each_element, :each_element_with_quantity
+    alias_method :vat_rates, :rates
+
 
     private 
 
@@ -159,6 +153,13 @@ module Vatcalc
         raise TypeError.new "#{obj} can't be converted into a BaseElement"
       end
     end
+
+
+    def rates_changed!
+      @rates = nil
+      @total = nil
+    end
+
 
 
   end
