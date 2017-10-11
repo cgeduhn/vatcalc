@@ -12,13 +12,13 @@ module Vatcalc
 
     def initialize()
       @base = Base.new
-      @services = Hash.new(0)
+      @services = []
     end
 
     def insert(obj,quantity=1)
       case oth
       when Service
-        @services[obj] += 1
+        @services.insert(obj,@services.size,quantity)
       when BaseElement
         @base.insert(obj,quantity)
       else 
