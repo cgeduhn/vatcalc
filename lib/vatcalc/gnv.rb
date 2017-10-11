@@ -29,10 +29,9 @@ module Vatcalc
 
     [:+,:-,:*].each do |m_name|
       define_method(m_name) do |oth|
-        case oth
-        when GNV
+        if oth.is_a?(GNV) && m_name != :*
           v = @vector.send(m_name,oth.vector)
-        when Numeric
+        elsif oth.is_a?(Numeric) && m_name == :*
           v = @vector.send(m_name,oth)
         else
           #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
