@@ -33,9 +33,7 @@ module Vatcalc
       #put quantity times the object in the elements array
       @elements[obj] += quantity
 
-      @total ? @total += gnv : @total = gnv
-
-      @rates_changed = true
+      rates_changed!
 
       self
     end
@@ -48,7 +46,11 @@ module Vatcalc
       @elements.each { |elem, quantity| (yield elem, quantity) if block_given? }
     end
 
-    delegate :gross,:net,:vat,:curr,:currency, to: :@total
+    def total
+      @total ||= @grouped_amounts.values.sum
+    end
+
+    delegate :gross,:net,:vat,:curr,:currency, to: :total
 
     def vat_percentages
       @grouped_amounts.keys
@@ -74,43 +76,42 @@ module Vatcalc
     # "{1.0=>0.2475, 1.19=>0.3371, 1.07=>0.4154}"
     # "{1.0=>0.1739, 1.19=>0.5261, 1.07=>0.3}"
     def rates
-      !rates_changed? && @rates ? @rates : rates!
+      @rates ||= rates!
     end
 
     #@see +rates+
     def rates!
       max_p = vat_percentages.max
       min_p = vat_percentages.min
-      @rate_hash = Hash.new(0.00)
+      @rates = Hash.new(0.00)
       if net != 0 
         
-        @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = (gnv.net/net).round(6) }
+        @grouped_amounts.each { |(vp,gnv)| @rates[vp] = (gnv.net/net).round(6) }
         #it can be that there is a small difference.
         #so it should be corrected here
 
-        calc_diff = ->{ @rate_hash.values.sum.round(6) - 1.00 }
+        calc_diff = ->{ @rates.values.sum.round(6) - 1.00 }
         diff = calc_diff.call
-        l = @rate_hash.length
+        l = @rates.length
         tolerance = BigDecimal("1E-5")
         # the diff has to be negative => not over 1.00 and the absolut value has to be smaler than the tolerance 
         while diff.positive? || diff.abs >= tolerance
           # if diff is bigger than the tolerance it has to be allocated over all vat_percentage rates
           if diff.abs > tolerance
             eps = (diff / l) # if if negativ eps will be postive 
-            @rate_hash.each { |k,v| @rate_hash[k] = (eps + v).round(6) }
+            @rates.each { |k,v| @rates[k] = (eps + v).round(6) }
           else
             #the diff is equal the tolerance or is positive. taking now the smallest 
             #vat vercentage value here and subtract the diff
-            @rate_hash[min_p] = (@rate_hash[min_p] - diff).round(6)
+            @rates[min_p] = (@rates[min_p] - diff).round(6)
           end
           diff = calc_diff.call
         end
       else
-        @rate_hash = @grouped_amounts.each { |(vp,gnv)| @rate_hash[vp] = 0.00 }
-        @rate_hash[max_p] = 1.00 if max_p
+        @rates = @grouped_amounts.each { |(vp,gnv)| @rates[vp] = 0.00 }
+        @rates[max_p] = 1.00 if max_p
       end
-      @rates_changed = false
-      @rate_hash
+      @rates
     end
 
     alias :vat_rates :rates
@@ -135,11 +136,16 @@ module Vatcalc
       !!@rates_changed
     end
 
+    def rates_changed!
+      @rates = nil
+      @total = nil
+    end
+
+
+
 
     private 
-      def total
-        @total || GNV.new(0,0)
-      end
+
 
   end
 end
