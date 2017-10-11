@@ -24,7 +24,7 @@ module Vatcalc
     def initialize(gross,net,curr=nil)
       @currency ||= (curr || Vatcalc.currency)
       @vector = Vector[*[gross,net].map{|i| Util.convert_to_money(i,@currency)}]
-      raise ArgumentError.new "gross: #{gross.to_f} must >= net: #{net.to_f}" if self.gross.abs < self.net.abs
+      raise ArgumentError.new "gross: #{self.gross.to_f} must >= net: #{self.net.to_f}" if self.gross.abs < self.net.abs
     end
 
     [:+,:-,:*].each do |m_name|

@@ -12,34 +12,33 @@ module Vatcalc
     end
 
     def insert(obj,quantity=1)
-      obj = case obj
-      when BaseElement
-        obj
-      when Numeric,Money
-        BaseElement.new(obj,currency: currency)
-      when Hash
-        BaseElement.new(obj[:amount] || obj[:gross] || obj[:value],obj.tap{|h| h[:currency] ||= currency})
-      when Array
-        BaseElement.new(obj[0], percentage: obj[1],currency: obj[2])
-      else
-        raise TypeError.new "#{obj} can't be converted into a BaseElement"
-      end
       #building a abstract gnv object thats responds_to gross, net, vat
-      gnv = (obj * quantity)
+      obj = obj_to_base_element(obj)
+     
+      if quantity != 0 && quantity.is_a?(Fixnum)
+        obj = obj_to_base_element(obj)
+        gnv = (quantity == 1 ? obj.to_gnv : (obj * quantity))
+        #add or set gnv to the vat_percentage key
+        @grouped_amounts[obj.vat_p] ? @grouped_amounts[obj.vat_p] += gnv : @grouped_amounts[obj.vat_p] = gnv
+        #put quantity times the object in the elements array
+        @elements[obj] += quantity
 
-      #add or set gnv to the vat_percentage key
-      @grouped_amounts[obj.vat_p] ? @grouped_amounts[obj.vat_p] += gnv : @grouped_amounts[obj.vat_p] = gnv
-
-      #put quantity times the object in the elements array
-      @elements[obj] += quantity
-
-      rates_changed!
+        if quantity < 0
+          @elements.delete(obj) unless @elements[obj] >= 0
+        end
+        
+        rates_changed!
+      end
 
       self
     end
 
+    def remove(obj,quantity= -1)
+      insert(obj,quantity)
+    end
+
     def [](arg)
-      @grouped_amounts[(arg.is_a?(VATPercentage) ? arg : VATPercentage.new(arg))]
+      @grouped_amounts[VATPercentage.new(arg)]
     end
 
     def each_element_with_quantity
@@ -141,6 +140,23 @@ module Vatcalc
     def rates_changed!
       @rates = nil
       @total = nil
+    end
+
+    private 
+
+    def obj_to_base_element(obj)
+      case obj
+      when BaseElement
+        obj
+      when Numeric,Money
+        BaseElement.new(obj,currency: currency)
+      when Hash
+        BaseElement.new(obj[:amount] || obj[:gross] || obj[:value],obj.tap{|h| h[:currency] ||= currency})
+      when Array
+        BaseElement.new(obj[0], percentage: obj[1],currency: obj[2])
+      else
+        raise TypeError.new "#{obj} can't be converted into a BaseElement"
+      end
     end
 
 

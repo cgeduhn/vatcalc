@@ -15,6 +15,10 @@ module Vatcalc
       @services = []
     end
 
+    def <<(obj)
+      insert(obj)
+    end
+
     def insert(obj,quantity=1)
       case oth
       when Service
