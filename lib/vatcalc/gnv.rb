@@ -17,7 +17,7 @@ module Vatcalc
     attr_reader :vector,:currency
 
     
-    alias :curr :currency
+    alias_method :curr, :currency
     delegate :==, to: :@vector
     delegate :<,:>,:<=,:>=, to: :net
 

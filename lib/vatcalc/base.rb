@@ -2,16 +2,14 @@
 module Vatcalc    
   class Base 
 
+    delegate :gross,:net,:vat,:curr,:currency, to: :total
+
     def initialize()
       @grouped_amounts = {}
       @elements = Hash.new(0)
     end
 
-    def <<(obj)
-      insert(obj,1)
-    end
-
-    def insert(obj,quantity=1)
+    def insert(obj, quantity = 1)
       #building a abstract gnv object thats responds_to gross, net, vat
       obj = obj_to_base_element(obj)
      
@@ -26,16 +24,19 @@ module Vatcalc
         if quantity < 0
           @elements.delete(obj) unless @elements[obj] >= 0
         end
-        
+
         rates_changed!
       end
 
       self
     end
 
-    def remove(obj,quantity= -1)
+    def remove(obj, quantity = -1)
       insert(obj,quantity)
     end
+
+    alias_method :<<, :insert
+    alias_method :>>, :remove
 
     def [](arg)
       @grouped_amounts[VATPercentage.new(arg)]
@@ -49,17 +50,17 @@ module Vatcalc
       @total ||= @grouped_amounts.values.sum
     end
 
-    delegate :gross,:net,:vat,:curr,:currency, to: :total
+    
 
     def vat_percentages
       @grouped_amounts.keys
     end
 
-    alias :add :insert
-    alias :percentages :vat_percentages
+    alias_method :add, :insert
+    alias_method :percentages, :vat_percentages
 
-    alias :each_elem :each_element_with_quantity
-    alias :each_element :each_element_with_quantity
+    alias_method :each_elem, :each_element_with_quantity
+    alias_method :each_element, :each_element_with_quantity
 
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 

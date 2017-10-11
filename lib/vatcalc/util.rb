@@ -21,6 +21,7 @@ module Vatcalc
         raise InvalidAmountError.new "Can't convert #{obj.class} to an Money instance"
       end
     end
+
   end
 
 

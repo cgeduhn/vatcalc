@@ -36,8 +36,8 @@ module Vatcalc
     end
 
 
-    alias :percentage :vat_percentage
-    alias :vat_p :vat_percentage
+    alias_method :percentage, :vat_percentage
+    alias_method :vat_p, :vat_percentage
     #TODO delegate + and - to: to_base 
     delegate :+,:-,:*, to: :to_gnv
 
