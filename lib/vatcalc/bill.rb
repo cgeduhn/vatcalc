@@ -12,7 +12,7 @@ module Vatcalc
 
     def initialize()
       @base = Base.new
-      @services = []
+      @services = Hash.new(0)
     end
 
     def <<(obj)

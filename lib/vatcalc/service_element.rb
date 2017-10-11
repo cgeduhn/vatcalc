@@ -4,7 +4,6 @@ module Vatcalc
 
     attr_reader :vat_splitted
 
-    delegate :rates,to: :@base
 
     def initialize(amount,options={})
       @base = options.fetch(:base,Base.new)
