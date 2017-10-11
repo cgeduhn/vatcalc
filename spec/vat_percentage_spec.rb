@@ -28,6 +28,21 @@ RSpec.describe Vatcalc::VATPercentage do
     expect(h.has_key? perc.new(0.19) ).to eq(true)
   end
 
+  it "has same hashes" do 
+    p1 = perc.new(0.19)
+    p2 = perc.new(19)
+    p3 = perc.new(7)
+    p4 = perc.new(0.07)
+
+    expect(p1).to eq(p2)
+    expect(p3).to eq(p4)
+    expect(p1).not_to eq(p4)
+
+    h = {p1 => 1}
+    expect(h.has_key?(p1)).to eq(true)
+    expect(h.has_key?(p2)).to eq(true)
+  end
+
   it "compares correctly" do
     s = perc.new(7)
     s1 = perc.new(7)

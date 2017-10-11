@@ -6,6 +6,9 @@
 module Vatcalc    
   class BaseElement < GNV
 
+    include Comparable
+
+
     attr_reader :vat_percentage
     alias_method :percentage, :vat_percentage
     alias_method :vat_p, :vat_percentage
@@ -41,7 +44,11 @@ module Vatcalc
 
     def hash
       #vector comes from GNV
-      [@vector,@vat_percentage].hash
+      [@vector,@vat_percentage,self.class].hash
+    end
+
+    def ==(oth)
+      oth.is_a?(BaseElement) ? (oth.vector == @vector) && (vat_p == oth.vat_p) : false
     end
 
 

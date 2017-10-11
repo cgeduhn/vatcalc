@@ -13,6 +13,7 @@ RSpec.describe Vatcalc::Base do
 
     b << {percentage: 19.00,value: 100.00}
 
+
     expect(b.gross.to_f).to eq(201.00)
     expect(b.net.to_f).to eq(178.33)
     expect(b.vat.to_f).to eq((201.00 - 178.33).round(2))
@@ -38,13 +39,41 @@ RSpec.describe Vatcalc::Base do
   end
 
 
-  it "can add an object with quantity 100" do 
+  it "can add and substract object with quantity 100" do 
     obj1 = Vatcalc::BaseElement.new(5.5,vat_percentage: 19)
     result = Vatcalc::Base.new.insert(obj1,100)
+    expect(result.each_elem.size).to eq(1)
+    expect(result.each_elem[0][1]).to eq(100)
 
     expect(result.gross.to_f).to eq(550.00)
     expect(result.net.to_f).to eq(462.00)
     expect(result.vat.to_f).to eq(88.00)
+
+    obj2 = Vatcalc::BaseElement.new(5.5,vat_percentage: 19)
+
+    
+
+    h = {obj1 => 1}
+
+    expect(obj1).to eq(obj2)
+    expect(obj1.hash).to eq(obj2.hash)
+    expect(obj1 > obj2).to eq(false)
+    expect(obj1 < obj2).to eq(false)
+    expect(obj1 <= obj2).to eq(true)
+    expect(obj1 >= obj2).to eq(true)
+
+    expect(h.has_key? obj1).to eq(true)
+    expect(h.has_key? obj2).to eq(true)
+
+    result.remove(obj2,50)
+
+    expect(result.gross.to_f).to eq(275.00)
+    expect(result.net.to_f).to eq(231.00)
+    expect(result.vat.to_f).to eq(44.00)
+    
+    expect(result.each_elem.size).to eq(1)
+    expect(result.each_elem[0][1]).to eq(50)
+
   end
 
   it "has correctly rates" do

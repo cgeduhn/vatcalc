@@ -11,7 +11,7 @@ module Vatcalc
 
     def insert(obj, quantity = 1)
       #building a abstract gnv object thats responds_to gross, net, vat     
-      if quantity != 0 && quantity.is_a?(Fixnum)
+      if quantity.to_i != 0
         obj = obj_to_base_element(obj)
         gnv = (quantity == 1 ? obj.to_gnv : (obj * quantity))
         #add or set gnv to the vat_percentage key
@@ -24,13 +24,15 @@ module Vatcalc
         end
 
         rates_changed!
+      else 
+        raise ArgumentError.new "quantity must be != 0. #{quantity} given"
       end
 
       self
     end
 
-    def remove(obj, quantity = -1)
-      insert(obj,quantity)
+    def remove(obj, quantity = 1)
+      insert(obj,-1 * quantity)
     end
 
     def [](arg)
@@ -38,7 +40,7 @@ module Vatcalc
     end
 
     def each_element_with_quantity
-      @elements.each { |elem, quantity| (yield elem, quantity) if block_given? }
+      block_given? ? @elements.each { |elem, quantity| (yield elem, quantity) } : @elements.to_a
     end
 
 

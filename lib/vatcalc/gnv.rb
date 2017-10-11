@@ -12,14 +12,14 @@ require "matrix"
 # You can add or subtract two GNVs
 # GNV.new(10.00,9.00) + GNV.new(9.00,0.00)
 module Vatcalc
-  class GNV 
+  class GNV
+
+    include Comparable
 
     attr_reader :vector,:currency
 
     
     alias_method :curr, :currency
-    delegate :==, to: :@vector
-    delegate :<,:>,:<=,:>=, to: :net
 
     def initialize(gross,net,curr=nil)
       @currency ||= (curr || Vatcalc.currency)
@@ -41,6 +41,20 @@ module Vatcalc
           raise TypeError.new "#{oth.class} can't be coerced into #{self.class}"
         end
         to_gnv(v)
+      end
+    end
+
+    def ==(oth)
+      oth.is_a?(GNV) ? oth.vector == @vector : false
+    end
+
+    alias_method :eql?, :==
+
+    def <=>(other)
+      if other.respond_to?(:net)
+        net <=> other.net
+      else
+        net <=> other
       end
     end
 
