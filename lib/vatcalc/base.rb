@@ -78,35 +78,30 @@ module Vatcalc
 
 
     RoundPrecision = 4
+    #will only be used in rspec for test
     Tolerance = BigDecimal("1E-#{RoundPrecision}")
     #@see +rates+
     def rates!
-      max_p = vat_percentages.max
-      min_p = vat_percentages.min
+      
       @rates = Hash.new(0.00)
       if net != 0 
         
-        @grouped_amounts.each { |(vp,gnv)| @rates[vp] = (gnv.net/net).round(RoundPrecision) }
-        #it can be that there is a small difference.
-        #so it should be corrected here
+        l = vat_percentages.length
 
-        calc_diff = ->{ @rates.values.sum.round(RoundPrecision) - 1.00 }
-        diff = calc_diff.call
-        l = @rates.length
-        # the diff has to be negative => not over 1.00 and the absolut value has to be smaler than the tolerance 
-        while diff.positive? || diff.abs >= Tolerance
-          # if diff is bigger than the tolerance it has to be allocated over all vat_percentage rates
-          if diff.abs > Tolerance
-            eps = (diff / l) # if if negativ eps will be postive 
-            @rates.each { |k,v| @rates[k] = (eps + v).round(RoundPrecision) }
+        left_over = 1.00
+
+        @grouped_amounts.each_with_index do |(vp,gnv),i|
+          if i == (l - 1)
+            #last element
+            @rates[vp] = left_over.round(RoundPrecision)
           else
-            #the diff is equal the tolerance or is positive. taking now the smallest 
-            #vat vercentage value here and subtract the diff
-            @rates[min_p] = (@rates[min_p] - diff).round(RoundPrecision)
+            @rates[vp] = (gnv.net / net).round(RoundPrecision)
+            left_over -= @rates[vp]
           end
-          diff = calc_diff.call
         end
+
       else
+        max_p = vat_percentages.max
         @rates = @grouped_amounts.each { |(vp,gnv)| @rates[vp] = 0.00 }
         @rates[max_p] = 1.00 if max_p
       end
