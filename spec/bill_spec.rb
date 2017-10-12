@@ -3,7 +3,7 @@ require "spec_helper"
 RSpec.describe Vatcalc::Bill do
 
   let(:tolerance) { Vatcalc::Bill::Tolerance }
-  let(:round_precision) { Vatcalc::Base::RoundPrecision }
+  let(:round_precision) { Vatcalc::Bill::RoundPrecision }
 
 
 
@@ -76,8 +76,8 @@ RSpec.describe Vatcalc::Bill do
           {value: r.call,vat_percentage: 7, quantity: 2},
           {value: r.call,vat_percentage: 19,   quantity: 2}
         ])
-        d = (b.rates.values.sum.to_d(Vatcalc::Base::RoundPrecision))
-        expect(1.00 - d).to be <= (Vatcalc::Base::Tolerance)
+        d = (b.rates.values.sum.to_d(Vatcalc::Bill::RoundPrecision))
+        expect(1.00 - d).to be <= (Vatcalc::Bill::Tolerance)
       end
     end
   end
@@ -152,6 +152,32 @@ RSpec.describe Vatcalc::Bill do
       p b.rates
       expect(s.net).to eq(expected_net)
     end
+  end
+
+
+  describe "with a simple base with VAT percentage of 19" do 
+    let(:elem) {Vatcalc::BaseElement.new(10.00,percentage: 19)}
+
+    let (:s) {Vatcalc::ServiceElement.new(5.00)}
+
+    let (:b) {Vatcalc::Bill.new(base: elem,services: s)}
+
+
+    it "has correctly net" do
+      b.rates
+      expect(s.net.to_f).to eq(4.2)
+    end
+
+    it "has correctly vat" do
+      b.rates
+      expect(s.vat.to_f).to eq(0.8)
+    end
+
+    it "has a correctly vat splitting" do
+      b.rates
+      expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.euro(80)})
+    end
+
   end
 
 
