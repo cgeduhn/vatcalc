@@ -128,11 +128,8 @@ module Vatcalc
 
         @total ? @total += gnv : @total = gnv
 
-        case obj
-        when BaseElement
-          @vat_percentages << obj.vat_percentage
-        when ServiceElement
-        end
+        @vat_percentages << obj.vat_percentage if obj.is_a?(BaseElement)
+        
         @currency = obj.currency
 
         #add or set gnv to the vat_percentage key
