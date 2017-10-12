@@ -75,7 +75,7 @@ module Vatcalc
         @rates = @grouped_amounts.each { |(vp,gnv)| @rates[vp] = 0.00 }
         @rates[max_p] = 1.00 if max_p
       end
-      @rates
+      @rates = @rates.sort.reverse.to_h #sorted by vat percentage
     end
 
 
@@ -119,7 +119,7 @@ module Vatcalc
         quantity = obj[1]
         obj = obj[0]
       end
-      
+
       obj = send(convert_method,obj) 
       quantity ||= 1
 

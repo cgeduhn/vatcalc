@@ -123,6 +123,38 @@ RSpec.describe Vatcalc::Bill do
 
   end
 
+
+  describe "with a base with VAT percentage of 19 and 7 and a coupon " do 
+    let(:elem1) {Vatcalc::BaseElement.new(9.99, percentage: 19)}
+    let(:elem2) {Vatcalc::BaseElement.new(9.99, percentage:  7)}
+    let(:elem3) {Vatcalc::BaseElement.new(9.99, percentage:  0)}
+
+    let (:s) {Vatcalc::ServiceElement.new(-3.00)}
+
+    let (:b) { Vatcalc::Bill.new(base: [elem1,elem2,elem3], services: s) }
+
+    #9.99 / 1.19 = 8.39 # => 0.3026 6 95526695527 # =>   0.3027
+    #9.99 / 1.07 = 9.34 # => 0.3369 4 083694083693 # =>  0.3369
+    #9.99 / 1.00 = 9.99 # => 0.3603 8 96103896104 # =>   0.3604
+
+    # => 27.72 net
+    # => 02.25 vat
+    # => 29.97 gross 
+
+
+    #Coupon 10%
+
+    let (:m) { Money.euro(-3*100).allocate([0.3027,0.3369,0.3604]) }
+
+    let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
+
+    it "has correctly net" do
+      p b.rates
+      expect(s.net).to eq(expected_net)
+    end
+  end
+
+
 end
 
 
@@ -153,32 +185,7 @@ end
   # end
 
 
-  # describe "with a base with VAT percentage of 19 and 7" do 
-  #   let(:elem1) {Vatcalc::BaseElement.new(9.99, percentage: 19)}
-  #   let(:elem2) {Vatcalc::BaseElement.new(9.99, percentage:  7)}
-  #   let(:elem3) {Vatcalc::BaseElement.new(9.99, percentage:  0)}
 
-  #   let (:b) {a = Vatcalc::Base.new.insert(elem1); a.insert(elem2); a.insert(elem3);}
-
-  #   #9.99 / 1.19 = 8.39 # => 0.302669 5526695527 # =>   0.302667
-  #   #9.99 / 1.07 = 9.34 # => 0.336940 83694083693 # =>  0.336941
-  #   #9.99 / 1.00 = 9.99 # => 0.360389 6103896104 # =>   0.360390
-
-  #   # => 27.72 net
-  #   # => 02.25 vat
-  #   # => 29.97 gross 
-
-
-  #   #Coupon 10%
-  #   let (:s) {Vatcalc::ServiceElement.new(-3.00,b.rates)}
-
-  #   let (:m) { Money.euro(-3*100).allocate([0.30267,0.336941,0.360389]) }
-
-  #   let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
-
-  #   it "has correctly net" do
-  #     expect(s.net).to eq(expected_net)
-  #end
 
 
 
