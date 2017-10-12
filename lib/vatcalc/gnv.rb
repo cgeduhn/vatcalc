@@ -27,7 +27,7 @@ module Vatcalc
       raise ArgumentError.new "gross: #{self.gross.to_f} must >= net: #{self.net.to_f}" if self.gross.abs < self.net.abs
     end
 
-    [:+,:-,].each do |m_name|
+    [:+,:-].each do |m_name|
       define_method(m_name) do |oth|
         oth.is_a?(GNV) ? v = @vector.send(m_name,oth.vector) : raise(TypeError.new) 
         to_gnv(v)
