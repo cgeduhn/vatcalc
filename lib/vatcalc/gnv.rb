@@ -27,22 +27,23 @@ module Vatcalc
       raise ArgumentError.new "gross: #{self.gross.to_f} must >= net: #{self.net.to_f}" if self.gross.abs < self.net.abs
     end
 
-    [:+,:-,:*].each do |m_name|
+    [:+,:-,].each do |m_name|
       define_method(m_name) do |oth|
-        if oth.is_a?(GNV) && m_name != :*
-          v = @vector.send(m_name,oth.vector)
-        elsif oth.is_a?(Numeric) && m_name == :*
-          v = @vector.send(m_name,oth)
-        elsif oth.respond_to?(:coerce)
-          #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
-          a, b = other.coerce(self)
-          return a.send(b)
-        else
-          raise TypeError.new "#{oth.class} can't be coerced into #{self.class}"
-        end
+        oth.is_a?(GNV) ? v = @vector.send(m_name,oth.vector) : raise(TypeError.new) 
         to_gnv(v)
       end
     end
+
+    def *(oth)
+      oth.is_a?(Numeric) ? v = @vector * oth : raise(TypeError.new) 
+      to_gnv(v)
+    end
+
+    #For usage of => - GNV.new(100.00,90.00)
+    def -@
+      to_gnv(-@vector)
+    end
+
 
     def ==(oth)
       oth.is_a?(GNV) ? oth.vector == @vector : false
@@ -58,10 +59,7 @@ module Vatcalc
       end
     end
 
-    #For usage of => - GNV.new(100.00,90.00)
-    def -@
-      to_gnv(-@vector)
-    end
+
 
     #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
     def coerce(oth)
