@@ -85,13 +85,9 @@ module Vatcalc
       
       @rates = Hash.new(0.00)
       if net != 0 
-        
-        l = vat_percentages.length
-
         left_over = 1.00
-
         @grouped_amounts.each_with_index do |(vp,gnv),i|
-          if i == (l - 1)
+          if i == (@grouped_amounts.length - 1)
             #last element
             @rates[vp] = left_over.round(RoundPrecision)
           else
@@ -99,7 +95,6 @@ module Vatcalc
             left_over -= @rates[vp]
           end
         end
-
       else
         max_p = vat_percentages.max
         @rates = @grouped_amounts.each { |(vp,gnv)| @rates[vp] = 0.00 }
