@@ -76,6 +76,14 @@ module Vatcalc
       @vector[1]
     end
 
+    def [](vat_percentage)
+      vat_splitted[arg.is_a?(VATPercentage) ? arg : VATPercentage.new(arg)]
+    end
+
+    def vat_splitted
+      @vat_splitted ||= {}
+    end
+
     # Returns a Integer hash value based on the +value+
     # in order to use functions like & (intersection), group_by, etc.
     #
@@ -93,7 +101,13 @@ module Vatcalc
     end
 
     def to_gnv(v=@vector)
-      GNV.new(v[0],v[1],@currency)
+      GNV.new(v[0],v[1],@currency).tap{|it| it.vat_splitted = self.vat_splitted}
+    end
+
+    protected 
+
+    def vat_splitted=(arg)
+      @vat_percentages = arg
     end
 
 
