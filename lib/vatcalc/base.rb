@@ -14,15 +14,11 @@ module Vatcalc
       if quantity.to_i != 0
         obj = obj_to_base_element(obj)
 
+        #correct quantity if it negativ quantity is smaller than in the elements hash
+        quantity = [quantity,-@elements[obj]].max
+
         #add or set gnv to the vat_percentage key
-        if quantity > 1
-          gnv = (obj * quantity)
-        elsif quantity == 1
-          gnv = obj.to_gnv
-        else
-          quantity = [quantity,-@elements[obj]].max
-          gnv = (obj * quantity)
-        end
+        gnv = (quantity == 1 ?  obj.to_gnv : (obj * quantity))
 
         @grouped_amounts[obj.vat_p] ? @grouped_amounts[obj.vat_p] += gnv : @grouped_amounts[obj.vat_p] = gnv
         #put quantity times the object in the elements array
@@ -82,7 +78,6 @@ module Vatcalc
     Tolerance = BigDecimal("1E-#{RoundPrecision}")
     #@see +rates+
     def rates!
-      
       @rates = Hash.new(0.00)
       if net != 0 
         left_over = 1.00
