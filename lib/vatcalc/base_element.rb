@@ -27,15 +27,17 @@ module Vatcalc
     def initialize(amount,options={})
       opt = options.to_h
 
-      amount =  Util.convert_to_money(amount || 0)
+      @currency = (opt[:currency] || opt[:curr])
+
+      amount =  Util.convert_to_money(amount || 0, @currency)
 
       @vat_percentage = (vp = (opt[:vat_percentage] || opt[:percentage])) ? VATPercentage.new(vp) : Vatcalc.vat_percentage
 
       # is the amount a net value or a gross value
       if opt[:net] == true
-        super(amount * vat_percentage, amount, (opt[:currency] || opt[:curr]))
+        super(amount * vat_percentage, amount, @currency)
       else
-        super(amount, amount / vat_percentage, (opt[:currency] || opt[:curr]))
+        super(amount, amount / vat_percentage, @currency)
       end
     end
 
@@ -44,7 +46,7 @@ module Vatcalc
 
     def hash
       #vector comes from GNV
-      [@vector,@vat_percentage,self.class].hash
+      [@vector,@vat_percentage].hash
     end
 
     def ==(oth)

@@ -32,7 +32,7 @@ module Vatcalc
     def insert(raw_obj, quantity = 1, convert_klass = BaseElement) 
       case raw_obj
       when Hash
-        quantity = raw_obj.fetch(:quantity,1).to_i
+        quantity = raw_obj.fetch(:quantity,quantity || 1).to_i
       when Array
         raw_obj.each { |obj, quantity| insert(obj, quantity, convert_klass)}
         return self
@@ -72,7 +72,7 @@ module Vatcalc
     end
 
     def total
-      @total ||= elements.inject(GNV.new(0,0,@currency)) {|sum, (obj,q,gnv)| sum += (gnv * q)}
+      @total ||= elements.inject(GNV.new(0,0,self.currency)) {|sum, (obj,q,gnv)| sum += (gnv * q)}
     end
 
     def vat_splitted
@@ -112,7 +112,7 @@ module Vatcalc
     #@see +rates+
     def rates!
       @rates = Hash.new(0.00)
-      base_net = @base_elements.inject(Money.new(0,@currency)) { |sum,(elem,q,gnv)| sum += gnv.net * q}
+      base_net = @base_elements.inject(Money.new(0,self.currency)) { |sum,(elem,q,gnv)| sum += gnv.net * q}
       if base_net != 0 
         left_over = 1.00
         grouped_amounts = @base_elements.inject(money_hash){ |h,(elem,q,gnv)| h[gnv.vat_p] += gnv.net * q; h}.sort
@@ -165,7 +165,7 @@ module Vatcalc
     private 
 
     def obj_to_gnv(klass,obj,klass_options={})
-      klass_options = {currency: @currency}
+      klass_options = {currency: self.currency}
       klass_options[:rates] = self.rates if klass == ServiceElement
 
       case obj
@@ -184,7 +184,7 @@ module Vatcalc
     end
 
     def money_hash
-      Hash.new(Money.new(0,@currency))
+      Hash.new(Money.new(0,self.currency))
     end
 
     def reset_instance_variables!

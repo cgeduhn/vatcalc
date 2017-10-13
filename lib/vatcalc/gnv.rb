@@ -18,11 +18,9 @@ module Vatcalc
 
     attr_reader :vector,:currency
 
-    
-    alias_method :curr, :currency
 
-    def initialize(gross,net,curr=nil)
-      @currency ||= (curr || Vatcalc.currency)
+    def initialize(gross,net,cur=nil)
+      @currency ||= (cur || Vatcalc.currency)
       init_vector(gross,net)
     end
 
@@ -90,13 +88,13 @@ module Vatcalc
     end
 
     def to_gnv(v=@vector)
-      GNV.new(v[0],v[1],@currency)
+      GNV.new(v[0],v[1],self.currency)
     end
 
     private 
 
-    def init_vector(gross,net)
-      @vector = Vector[*[gross,net].map{|i| Util.convert_to_money(i,@currency)}]
+    def init_vector(g,n)
+      @vector = Vector[*[g,n].map{|i| Util.convert_to_money(i,self.currency)}]
     end
 
 

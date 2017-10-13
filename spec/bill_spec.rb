@@ -207,6 +207,31 @@ RSpec.describe Vatcalc::Bill do
   end
 
 
+
+  describe "with a simple base with VAT percentage of 19 and USD" do 
+    let (:b) {Vatcalc::Bill.new(currency: "USD", base: {amount: 10.00, percentage: 19}, services: {amount: 5.00}, )}
+
+    let (:s) {b.service_elements.last.last}
+
+    it "has correctly net" do
+
+      b.rates
+      expect(s.net.to_f).to eq(4.2)
+    end
+
+    it "has correctly vat" do
+      b.rates
+      expect(s.vat.to_f).to eq(0.8)
+    end
+
+    it "has a correctly vat splitting" do
+      b.rates
+      expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.usd(80)})
+    end
+
+  end
+
+
 end
 
 
