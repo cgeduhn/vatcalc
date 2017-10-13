@@ -17,6 +17,7 @@ module Vatcalc
     include Comparable
 
     attr_reader :vector,:currency
+    attr_accessor :source
 
     
     alias_method :curr, :currency

@@ -6,16 +6,24 @@ module Vatcalc
 
     attr_reader :base_elements
     attr_reader :service_elements
-    attr_reader :elements
-    attr_reader :total
     attr_reader :currency
 
     delegate :gross,:net,:vat, to: :total
 
-    def initialize(options={})
-      @vat_percentages = Set.new
-      @base_elements    = insert_by_option_argument( options.to_h.fetch(:base),        :obj_to_base_element)
-      @service_elements = insert_by_option_argument( options.to_h.fetch(:services,[]), :obj_to_service_element)
+    def initialize(opt={})
+      @base_elements = []
+      @service_elements = []
+
+      arg_hash = { obj_to_base_element: opt.fetch(:base), obj_to_service_element: opt.fetch(:services,[]) }
+      arg_hash.each do |convert_method,arg|
+        case arg
+        when Array
+          arg.each{|i| insert(i,convert_method) }
+        else
+          insert(arg,convert_method)
+        end
+      end
+
     end
 
     def elements 
@@ -23,13 +31,17 @@ module Vatcalc
     end
 
     def vat_percentages
-      @vat_percentages.to_a
+      @vat_percentages ||= @base_elements.collect{|obj,q| obj.vat_p}.to_set
+    end
+
+    def total
+      @total ||= elements.sum {|obj,quantity| obj * quantity}
     end
 
     def vat_splitted
-      @vat_splitted ||= money_hash.tap do |result_hash|
-        @base_elements.each {|elem,q| result_hash[elem.vat_p] += (elem*q).vat}
-        @service_elements.each {|elem,q| elem.vat_splitted.each {|vp,vat| result_hash[vp] += vat} }
+      @vat_splitted ||= money_hash.tap do |h|
+        @base_elements.each {|elem,q| h[elem.vat_p] += (elem*q).vat}
+        @service_elements.each {|elem,q| elem.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
       end
     end
 
@@ -101,43 +113,37 @@ module Vatcalc
 
     private 
 
-    def insert_by_option_argument(arg,convert_method)
-      case arg
-      when Array
-        arg.collect{|i| insert(i,convert_method) }
-      else
-        [insert(arg,convert_method)]
-      end
-    end
-
-
-    def insert(obj, convert_method) 
-      case obj
+    def insert(raw_obj, convert_method) 
+      case raw_obj
       when Hash
-        quantity = obj[:quantity]
+        quantity = raw_obj.fetch(:quantity,1).to_i
       when Array
-        quantity = obj[1]
-        obj = obj[0]
+        quantity = raw_obj.fetch(1,1).to_i
+        raw_obj  = raw_obj[0]
+      else 
+        quantity = 1
       end
 
-      obj = send(convert_method,obj) 
-      quantity ||= 1
+      if quantity > 0
 
-      if quantity.to_i > 0
-        gnv = quantity.to_i == 1 ? obj.to_gnv : obj.to_gnv * quantity
+        obj = send(convert_method,raw_obj) 
 
-        @total ? @total += gnv : @total = gnv
+        obj.source = raw_obj
 
-        @vat_percentages << obj.vat_percentage if obj.is_a?(BaseElement)
-        
+        reset_instance_variables!
+
+        case obj
+        when BaseElement
+          @base_elements    << [obj,quantity]
+        when ServiceElement
+          @service_elements << [obj,quantity]
+        end
+
         @currency = obj.currency
 
         #add or set gnv to the vat_percentage key
-      else 
-        raise ArgumentError.new "quantity must be != 0"
       end
 
-      [obj,quantity]
     end
 
     def obj_to_base_element(obj)
@@ -169,6 +175,13 @@ module Vatcalc
 
     def money_hash
       Hash.new(Money.new(0,@currency))
+    end
+
+    def reset_instance_variables!
+      @total = nil
+      @vat_splitted = nil
+      @vat_percentages = nil
+      @rates = nil
     end
 
 
