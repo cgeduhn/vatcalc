@@ -26,12 +26,12 @@ module Vatcalc
 
         if @net_service 
           to_allocate = net
-          new_gross = Money.new(0,self.currency)
+          new_gross = Money.new(0,@currency)
           new_net = net
         else
           to_allocate = gross
           new_gross = gross
-          new_net = Money.new(0,self.currency)
+          new_net = Money.new(0,@currency)
         end
         # Allocates a amount to the vat_percentage rates
         # @return [Hash]
