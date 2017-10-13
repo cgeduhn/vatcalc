@@ -20,22 +20,20 @@ module Vatcalc
     end
 
     def insert_base_element(raw_obj, quantity = 1)
-      @convert_method = :obj_to_base_element
-      insert(raw_obj, quantity = 1)
+      insert(raw_obj, quantity, BaseElement)
     end
 
     def insert_service_element(raw_obj, quantity = 1)
-      @convert_method = :obj_to_service_element
-      insert(raw_obj, quantity = 1)
+      insert(raw_obj, quantity, ServiceElement)
     end
 
 
-    def insert(raw_obj, quantity = 1) 
+    def insert(raw_obj, quantity = 1, convert_klass = BaseElement) 
       case raw_obj
       when Hash
         quantity = raw_obj.fetch(:quantity,1).to_i
       when Array
-        raw_obj.each { |obj, quantity| insert(obj, quantity)}
+        raw_obj.each { |obj, quantity| insert(obj, quantity, convert_klass)}
         return self
       # TODO ACTS AS SERVICE 
       # TODO ACTS AS BASE
@@ -47,7 +45,7 @@ module Vatcalc
 
       if quantity > 0
 
-        gnv = send(@convert_method ||= :obj_to_base_element,raw_obj) 
+        gnv = obj_to_gnv(convert_klass,raw_obj)
 
         case gnv
         when BaseElement
@@ -166,30 +164,22 @@ module Vatcalc
 
     private 
 
-    def obj_to_base_element(obj)
+    def obj_to_gnv(klass,obj,klass_options={})
+      klass_options = {currency: @currency}
+      klass_options[:rates] = self.rates if klass == ServiceElement
+
       case obj
       when BaseElement
         obj
-      when Numeric,Money
-        BaseElement.new(obj)
-      when Hash
-        BaseElement.new(obj[:amount] || obj[:gross] || obj[:value], obj)
-      else
-        raise TypeError.new "#{obj} can't be converted into a BaseElement"
-      end
-    end
-
-    def obj_to_service_element(obj)
-      case obj
       when ServiceElement
-        obj.change_rates(rates)
+        obj.change_rates(klass_options[:rates])
         obj
       when Numeric,Money
-        ServiceElement.new(obj,rates)
+        klass.new(obj,klass_options)
       when Hash
-        ServiceElement.new(obj[:amount] || obj[:gross] || obj[:value],rates)
+        klass.new(obj[:amount] || obj[:gross] || obj[:value], obj.merge(klass_options))
       else
-        raise TypeError.new "#{obj} can't be converted into a ServiceElement"
+        raise TypeError.new "#{obj} can't be converted into a #{klass}"
       end
     end
 
