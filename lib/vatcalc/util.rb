@@ -25,7 +25,7 @@ module Vatcalc
       end
 
       def human_percentage_value(value,precision=2)
-        #@example @value = 1.19 # => full = 19, fraction = 0.00 
+        #@example @value = 0.19 # => full = 19, fraction = 0.00 
         full, fraction = ((value.to_f)*100).to_f.round(precision).divmod(1)
         full.to_s + (fraction > 0.00 ? ("." + fraction.round(precision).to_s[2..-1]) : "") + "%"
       end
