@@ -113,7 +113,7 @@ module Vatcalc
     #@see +rates+
     def rates!
       @rates = Hash.new(0.00)
-      base_net = @base_elements.inject(Money.new(0,@currency)) { |sum,(elem,q,gnv)| sum += gnv.net * q}
+      base_net = @base_elements.inject(new_money) { |sum,(elem,q,gnv)| sum += gnv.net * q}
       if base_net != 0 
         left_over = 1.00
         grouped_amounts = @base_elements.inject(money_hash){ |h,(elem,q,gnv)| h[gnv.vat_p] += gnv.net * q; h}.sort
@@ -185,7 +185,11 @@ module Vatcalc
     end
 
     def money_hash
-      Hash.new(Money.new(0,@currency))
+      Hash.new(new_money)
+    end
+
+    def new_money
+      Money.new(0,@currency)
     end
 
     def reset_instance_variables!
