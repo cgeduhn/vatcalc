@@ -14,15 +14,57 @@ module Vatcalc
       @base_elements = []
       @service_elements = []
 
-      arg_hash = { obj_to_base_element: opt.fetch(:base), obj_to_service_element: opt.fetch(:services,[]) }
-      arg_hash.each do |convert_method,arg|
-        case arg
-        when Array
-          arg.each{|i| insert(i,convert_method) }
-        else
-          insert(arg,convert_method)
-        end
+      insert_base_element(opt.fetch(:base,[]))
+      insert_service_element(opt.fetch(:services,[]))
+
+    end
+
+    def insert_base_element(raw_obj, quantity = 1)
+      @convert_method = :obj_to_base_element
+      insert(raw_obj, quantity = 1)
+    end
+
+    def insert_service_element(raw_obj, quantity = 1)
+      @convert_method = :obj_to_service_element
+      insert(raw_obj, quantity = 1)
+    end
+
+
+    def insert(raw_obj, quantity = 1) 
+      case raw_obj
+      when Hash
+        quantity = raw_obj.fetch(:quantity,1).to_i
+      when Array
+        raw_obj.each { |obj, quantity| insert(obj, quantity)}
+        return self
+      # TODO ACTS AS SERVICE 
+      # TODO ACTS AS BASE
+      when nil
+        return self 
       end
+
+      quantity ||= 1
+
+      if quantity > 0
+
+        gnv = send(@convert_method ||= :obj_to_base_element,raw_obj) 
+
+        #obj.source = raw_obj
+
+        case gnv
+        when BaseElement
+          @base_elements    << [raw_obj,quantity,gnv]
+          rates_changed!
+        when ServiceElement
+          @service_elements << [raw_obj,quantity,gnv]
+        end
+
+        @currency = gnv.currency
+
+        reset_instance_variables!
+      end
+
+      self
 
     end
 
@@ -31,17 +73,17 @@ module Vatcalc
     end
 
     def vat_percentages
-      @vat_percentages ||= @base_elements.collect{|obj,q| obj.vat_p}.to_set
+      @vat_percentages ||= @base_elements.collect{|obj,q,gnv| gnv.vat_p}.to_set
     end
 
     def total
-      @total ||= elements.sum {|obj,quantity| obj * quantity}
+      @total ||= elements.sum {|obj,q,gnv| gnv * q}
     end
 
     def vat_splitted
       @vat_splitted ||= money_hash.tap do |h|
-        @base_elements.each {|elem,q| h[elem.vat_p] += (elem*q).vat}
-        @service_elements.each {|elem,q| elem.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
+        @base_elements.each {|elem,q,gnv| h[gnv.vat_p] += (gnv*q).vat}
+        @service_elements.each {|elem,q,gnv| gnv.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
       end
     end
 
@@ -77,7 +119,7 @@ module Vatcalc
       @rates = Hash.new(0.00)
       if net != 0 
         left_over = 1.00
-        grouped_amounts = @base_elements.inject(money_hash){ |h,(elem,q)| h[elem.vat_p] += elem.net * q; h}.sort
+        grouped_amounts = @base_elements.inject(money_hash){ |h,(elem,q,gnv)| h[gnv.vat_p] += gnv.net * q; h}.sort
 
         grouped_amounts.each_with_index do |(vp,amount),i|
           if i == (grouped_amounts.length - 1)
@@ -90,7 +132,6 @@ module Vatcalc
         end
       else
         max_p = vat_percentages.max
-        @rates = @grouped_amounts.each { |(vp,gnv)| @rates[vp] = 0.00 }
         @rates[max_p] = 1.00 if max_p
       end
       @rates = @rates.sort.reverse.to_h #sorted by vat percentage
@@ -127,39 +168,6 @@ module Vatcalc
 
     private 
 
-    def insert(raw_obj, convert_method) 
-      case raw_obj
-      when Hash
-        quantity = raw_obj.fetch(:quantity,1).to_i
-      when Array
-        quantity = raw_obj.fetch(1,1).to_i
-        raw_obj  = raw_obj[0]
-      else 
-        quantity = 1
-      end
-
-      if quantity > 0
-
-        obj = send(convert_method,raw_obj) 
-
-        obj.source = raw_obj
-
-        reset_instance_variables!
-
-        case obj
-        when BaseElement
-          @base_elements    << [obj,quantity]
-        when ServiceElement
-          @service_elements << [obj,quantity]
-        end
-
-        @currency = obj.currency
-
-        #add or set gnv to the vat_percentage key
-      end
-
-    end
-
     def obj_to_base_element(obj)
       case obj
       when BaseElement
@@ -176,7 +184,7 @@ module Vatcalc
     def obj_to_service_element(obj)
       case obj
       when ServiceElement
-        obj.rates = rates
+        obj.change_rates(rates)
         obj
       when Numeric,Money
         ServiceElement.new(obj,rates)
@@ -195,7 +203,13 @@ module Vatcalc
       @total = nil
       @vat_splitted = nil
       @vat_percentages = nil
+    end
+
+    def rates_changed!
       @rates = nil
+      @service_elements.each do |elem,q,gnv|
+        gnv.change_rates(rates)
+      end
     end
 
 

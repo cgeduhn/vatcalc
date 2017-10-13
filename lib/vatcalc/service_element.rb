@@ -9,11 +9,11 @@ module Vatcalc
 
       super amount, 0
 
-      self.rates = rates
+      change_rates(rates)
 
     end
 
-    def rates=(arg)
+    def change_rates(arg)
       if arg.is_a? Hash
         # Allocates a amount to the vat_percentage rates
         # @return [Hash]
