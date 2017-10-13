@@ -29,24 +29,24 @@ module Vatcalc
     end
 
 
-    def insert(raw_obj, quantity = 1, convert_klass = BaseElement) 
+    def insert(raw_obj, quantity = 1, gnv_klass = BaseElement) 
       case raw_obj
       when Hash
         quantity = raw_obj.fetch(:quantity,quantity || 1).to_i
       when Array
-        raw_obj.each { |obj, quantity| insert(obj, quantity, convert_klass)}
+        raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}
         return self
       # TODO ACTS AS SERVICE 
       # TODO ACTS AS BASE
       when nil
-        return self 
+        raise ArgumentError.new ("Can't insert nil into #{self}")
       end
 
       quantity ||= 1
 
       if quantity > 0
 
-        gnv = obj_to_gnv(convert_klass,raw_obj)
+        gnv = obj_to_gnv(gnv_klass,raw_obj)
 
         case gnv
         when BaseElement
@@ -85,12 +85,6 @@ module Vatcalc
         @service_elements.each {|elem,q,gnv| gnv.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
       end
     end
-
-    # def each
-    #   elements.each {|obj,quantity|  
-    #     yield obj.source, quantity, obj.gross, obj.net, obj.vat
-    #   end
-    # end
 
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 
@@ -170,7 +164,7 @@ module Vatcalc
 
     def obj_to_gnv(klass,obj,klass_options={})
       klass_options = {currency: @currency}
-      klass_options[:rates] = self.rates if klass == ServiceElement
+      klass_options[:rates] = rates if klass == ServiceElement
 
       case obj
       when BaseElement
