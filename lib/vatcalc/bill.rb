@@ -49,8 +49,6 @@ module Vatcalc
 
         gnv = send(@convert_method ||= :obj_to_base_element,raw_obj) 
 
-        #obj.source = raw_obj
-
         case gnv
         when BaseElement
           @base_elements    << [raw_obj,quantity,gnv]

@@ -17,7 +17,6 @@ module Vatcalc
     include Comparable
 
     attr_reader :vector,:currency
-    attr_accessor :source
 
     
     alias_method :curr, :currency
@@ -47,7 +46,7 @@ module Vatcalc
 
 
     def ==(oth)
-      oth.is_a?(GNV) ? oth.vector == @vector && oth.source == @source : false
+      oth.is_a?(GNV) ? oth.vector == @vector : false
     end
 
     alias_method :eql?, :==
@@ -83,7 +82,7 @@ module Vatcalc
     # @example
     #   GNV.new(19,11).hash #=> 908351
     def hash
-      [@vector,@source].hash
+      @vector.hash
     end
 
     #Always gross - net
