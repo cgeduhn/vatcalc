@@ -13,6 +13,7 @@ module Vatcalc
     def initialize(opt={})
       @base_elements = []
       @service_elements = []
+      @currency = (opt[:currency] || Vatcalc.currency)
 
       insert_base_element(opt.fetch(:base,[]))
       insert_service_element(opt.fetch(:services,[]))
@@ -55,8 +56,6 @@ module Vatcalc
           @service_elements << [raw_obj,quantity,gnv]
         end
 
-        @currency = gnv.currency
-
         reset_instance_variables!
       end
 
@@ -73,7 +72,7 @@ module Vatcalc
     end
 
     def total
-      @total ||= elements.sum {|obj,q,gnv| gnv * q}
+      @total ||= elements.inject(GNV.new(0,0,@currency)) {|sum, (obj,q,gnv)| sum += (gnv * q)}
     end
 
     def vat_splitted
@@ -113,7 +112,8 @@ module Vatcalc
     #@see +rates+
     def rates!
       @rates = Hash.new(0.00)
-      if net != 0 
+      base_net = @base_elements.inject(Money.new(0,@currency)) { |sum,(elem,q,gnv)| sum += gnv.net * q}
+      if base_net != 0 
         left_over = 1.00
         grouped_amounts = @base_elements.inject(money_hash){ |h,(elem,q,gnv)| h[gnv.vat_p] += gnv.net * q; h}.sort
 
@@ -122,7 +122,7 @@ module Vatcalc
             #last element
             @rates[vp] = left_over.round(RoundPrecision)
           else
-            @rates[vp] = (amount / net).round(RoundPrecision)
+            @rates[vp] = (amount / base_net).round(RoundPrecision)
             left_over -= @rates[vp]
           end
         end
@@ -193,12 +193,16 @@ module Vatcalc
       @vat_percentages = nil
     end
 
+
     def rates_changed!
       @rates = nil
+      rates! if service_elements.any?
       @service_elements.each do |elem,q,gnv|
         gnv.change_rates(rates)
       end
     end
+
+
 
 
 

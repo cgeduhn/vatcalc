@@ -23,8 +23,7 @@ module Vatcalc
 
     def initialize(gross,net,curr=nil)
       @currency ||= (curr || Vatcalc.currency)
-      @vector = Vector[*[gross,net].map{|i| Util.convert_to_money(i,@currency)}]
-      raise ArgumentError.new "gross: #{self.gross.to_f} must >= net: #{self.net.to_f}" if self.gross.abs < self.net.abs
+      init_vector(gross,net)
     end
 
     [:+,:-].each do |m_name|
@@ -92,6 +91,12 @@ module Vatcalc
 
     def to_gnv(v=@vector)
       GNV.new(v[0],v[1],@currency)
+    end
+
+    private 
+
+    def init_vector(gross,net)
+      @vector = Vector[*[gross,net].map{|i| Util.convert_to_money(i,@currency)}]
     end
 
 

@@ -23,9 +23,16 @@ module Vatcalc
       if arg.is_a? Hash
 
         v_splitted = {}
-        new_net   = Money.new(0,@currency)
-        new_gross = Money.new(0,@currency)
 
+        if @net_service 
+          to_allocate = net
+          new_gross = Money.new(0,@currency)
+          new_net = net
+        else
+          to_allocate = gross
+          new_gross = gross
+          new_net = Money.new(0,@currency)
+        end
         # Allocates a amount to the vat_percentage rates
         # @return [Hash]
         # @example
@@ -49,26 +56,21 @@ module Vatcalc
         #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
         #
         if !arg.empty?
-          to_allocate = @net_service ? net : gross
-
           arg.keys.zip(to_allocate.allocate(arg.values)).to_h.each do |vp,splitted|
-
             if @net_service 
               splitted_net   = splitted
               splitted_gross = splitted_net * vp
+              new_gross += splitted_gross
             else
               splitted_net   = splitted / vp
               splitted_gross = splitted
+              new_net   += splitted_net
             end
-            new_net   += splitted_net
-            new_gross += splitted_gross
-
             v_splitted[vp] = splitted_gross - splitted_net
           end
         end
-
         @vat_splitted = v_splitted
-        @vector = Vector[gross,new_net]
+        init_vector(new_gross,new_net)
         @rates = arg
       else
         ArgumentError.new "Hash must be given not #{arg.class}"
@@ -81,11 +83,11 @@ module Vatcalc
 
     def hash
       #vector comes from GNV
-      [@vector,@vat_splitted,@net_splitted,self.class].hash
+      [gross,net].hash
     end
 
     def ==(oth)
-      oth.is_a?(ServiceElement) ? (oth.vector == @vector) && (@vat_splitted == oth.vat_splitted) : false
+      oth.is_a?(ServiceElement) ? oth.gross == gross && oth.net == net && (@vat_splitted == oth.vat_splitted) : false
     end
 
 

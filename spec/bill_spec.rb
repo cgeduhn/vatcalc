@@ -95,6 +95,7 @@ RSpec.describe Vatcalc::Bill do
 
 
     it "has correctly gross" do
+      expect(b.service_elements.length).to eq(1)
       expect(b.gross.to_f).to eq(27.60)
     end
 
@@ -149,8 +150,33 @@ RSpec.describe Vatcalc::Bill do
     let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
 
     it "has correctly net" do
-      p b.rates
+      expect(b.gross.to_f).to eq(26.97)
+      expect(b.net.to_f).to eq((expected_net + Money.euro(27.72*100)).to_f)
+
+      
+
+      #{"19%"=>"30.27%", "7%"=>"33.69%", "0%"=>"36.04%"}
       expect(s.net).to eq(expected_net)
+    end
+
+    it "has correctly net" do
+      bill = Vatcalc::Bill.new
+
+      service = Vatcalc::ServiceElement.new(-3.00)
+
+      bill.insert_service_element(service)
+
+
+
+      bill.insert_base_element([elem1,elem2,elem3])
+      
+
+      expect(service.net).to eq(expected_net)
+
+      expect(bill.gross.to_f).to eq(26.97)
+      expect(bill.net.to_f).to eq((expected_net + Money.euro(27.72*100)).to_f)
+      
+      
     end
   end
 
