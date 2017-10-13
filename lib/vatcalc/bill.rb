@@ -72,8 +72,11 @@ module Vatcalc
       @vat_percentages ||= @base_elements.collect{|obj,q,gnv| gnv.vat_p}.to_set
     end
 
-    def total
-      @total ||= elements.inject(GNV.new(0,0,@currency)) {|sum, (obj,q,gnv)| sum += (gnv * q)}
+    Totals = {total: :elements, base_total: :base_elements, services_total: :service_elements}
+    Totals.each do |m_name,elem_name|
+      define_method(m_name) do
+        instance_variable_get("@#{m_name}") || instance_variable_set("@#{m_name}", send(elem_name).inject(GNV.new(0,0,@currency)) {|sum, (obj,q,gnv)| sum += (gnv * q)})
+      end
     end
 
     def vat_splitted
@@ -114,7 +117,7 @@ module Vatcalc
     def rates!
       @rates = Hash.new(0.00)
       base_net = @base_elements.inject(new_money) { |sum,(elem,q,gnv)| sum += gnv.net * q}
-      if base_net != 0 
+      if base_net.to_f != 0 
         left_over = 1.00
         grouped_amounts = @base_elements.inject(money_hash){ |h,(elem,q,gnv)| h[gnv.vat_p] += gnv.net * q; h}.sort
 
@@ -193,7 +196,7 @@ module Vatcalc
     end
 
     def reset_instance_variables!
-      @total = nil
+      Totals.keys.each {|m_name| instance_variable_set("@#{m_name}",nil)}
       @vat_splitted = nil
       @vat_percentages = nil
     end
