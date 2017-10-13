@@ -76,6 +76,7 @@ RSpec.describe Vatcalc::Bill do
           {value: r.call,vat_percentage: 7, quantity: 2},
           {value: r.call,vat_percentage: 19,   quantity: 2}
         ])
+        p b.human_rates
         d = (b.rates.values.sum.to_d(Vatcalc::Bill::RoundPrecision))
         expect(1.00 - d).to be <= (Vatcalc::Bill::Tolerance)
       end

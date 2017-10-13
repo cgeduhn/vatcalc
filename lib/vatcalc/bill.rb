@@ -45,6 +45,12 @@ module Vatcalc
       end
     end
 
+    # def each
+    #   elements.each {|obj,quantity|  
+    #     yield obj.source, quantity, obj.gross, obj.net, obj.vat
+    #   end
+    # end
+
     # Output of rates in form of
     # key is VAT Percentage and Value is the rate 
     # "{1.0=>0.0092, 1.19=>0.8804, 1.07=>0.1104}"
@@ -103,7 +109,7 @@ module Vatcalc
     # {0.0=>11.56, 19.0=>10.71, 7.0=>77.73}"
     def human_rates
       #example ((1.19 - 1.00)*100).round(2) => 19.0
-      rates.inject({}){|h,(pr,v)| h[((pr.to_f-1.00)*100).round(RoundPrecision-2)] = (v*100).round(RoundPrecision-2); h}
+      rates.inject({}){|h,(pr,v)| h[pr.to_s] = Util.human_percentage_value(v,RoundPrecision); h}
     end
 
 

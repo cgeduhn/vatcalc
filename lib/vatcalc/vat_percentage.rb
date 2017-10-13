@@ -18,7 +18,7 @@ module Vatcalc
       end
     end
 
-    delegate :to_i,:to_s,:to_f, to: :to_d
+    delegate :to_i,:to_f, to: :to_d
 
 
     #For comparisaon between a value or a +VATPercentage+
@@ -64,7 +64,7 @@ module Vatcalc
     end
 
     def inspect
-      "#<#{self.class.name} vat_percentage:#{to_d}>"
+      "#<#{self.class.name} vat_percentage:#{to_s}>"
     end
 
     # Returns a Integer hash value based on the +value+
@@ -78,8 +78,9 @@ module Vatcalc
       [@value,self.class].hash
     end
 
-
-
+    def to_s 
+      Util.human_percentage_value(@value-1.00)
+    end
 
 
     private 
