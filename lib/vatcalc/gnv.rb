@@ -88,13 +88,13 @@ module Vatcalc
     end
 
     def to_gnv(v=@vector)
-      GNV.new(v[0],v[1],self.currency)
+      GNV.new(v[0],v[1],@currency)
     end
 
     private 
 
     def init_vector(g,n)
-      @vector = Vector[*[g,n].map{|i| Util.convert_to_money(i,self.currency)}]
+      @vector = Vector[*[g,n].map{|i| Util.convert_to_money(i,@currency)}]
     end
 
 

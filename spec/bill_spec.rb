@@ -91,7 +91,7 @@ RSpec.describe Vatcalc::Bill do
     let (:s) { Vatcalc::ServiceElement.new(5.00) }
     let(:b) { Vatcalc::Bill.new(base: [elem1,elem2], services: [s]) }
 
-    let(:s_net) { Money.euro((2.5/1.19)*100) + Money.euro(100*(2.5/1.07)) }
+    let(:s_net) { Money.new((2.5/1.19)*100,Vatcalc.currency) + Money.new(100*(2.5/1.07),Vatcalc.currency) }
 
 
     it "has correctly gross" do
@@ -100,24 +100,24 @@ RSpec.describe Vatcalc::Bill do
     end
 
     it "has correctly net" do
-      expect(b.net).to eq(s_net + (2 * Money.euro(10 * 100)))
+      expect(b.net).to eq(s_net + (2 * Money.new(10 * 100,Vatcalc.currency)))
     end
 
     it "has correctly vat" do
-      expect(b.vat.to_f).to eq( (Money.euro(56) + Money.euro(1.9 * 100) + Money.euro(0.70 * 100)).to_f )
+      expect(b.vat.to_f).to eq( (Money.new(56,Vatcalc.currency) + Money.new(1.9 * 100,Vatcalc.currency) + Money.new(0.70 * 100,Vatcalc.currency)).to_f )
     end
 
     it "has correctly vat splitting" do
 
       expect(b.vat_splitted).to eq({
-        Vatcalc::VATPercentage.new(19) => elem1.vat + Money.euro(40),
-        Vatcalc::VATPercentage.new(7) =>  elem2.vat + Money.euro(16),
+        Vatcalc::VATPercentage.new(19) => elem1.vat + Money.new(40,Vatcalc.currency),
+        Vatcalc::VATPercentage.new(7) =>  elem2.vat + Money.new(16,Vatcalc.currency),
       })
 
 
       expect(s.vat_splitted).to eq({
-        Vatcalc::VATPercentage.new(19) => Money.euro(40),
-        Vatcalc::VATPercentage.new(7) =>  Money.euro(16)
+        Vatcalc::VATPercentage.new(19) => Money.new(40,Vatcalc.currency),
+        Vatcalc::VATPercentage.new(7) =>  Money.new(16,Vatcalc.currency)
       })
     end
 
@@ -145,13 +145,13 @@ RSpec.describe Vatcalc::Bill do
 
     #Coupon 10%
 
-    let (:m) { Money.euro(-3*100).allocate([0.3027,0.3369,0.3604]) }
+    let (:m) { Money.new(-3*100,Vatcalc.currency).allocate([0.3027,0.3369,0.3604]) }
 
     let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
 
     it "has correctly net" do
       expect(b.gross.to_f).to eq(26.97)
-      expect(b.net.to_f).to eq((expected_net + Money.euro(27.72*100)).to_f)
+      expect(b.net.to_f).to eq((expected_net + Money.new(27.72*100,Vatcalc.currency)).to_f)
 
       
 
@@ -174,7 +174,7 @@ RSpec.describe Vatcalc::Bill do
       expect(service.net).to eq(expected_net)
 
       expect(bill.gross.to_f).to eq(26.97)
-      expect(bill.net.to_f).to eq((expected_net + Money.euro(27.72*100)).to_f)
+      expect(bill.net.to_f).to eq((expected_net + Money.new(27.72*100,Vatcalc.currency)).to_f)
       
       
     end
@@ -201,7 +201,7 @@ RSpec.describe Vatcalc::Bill do
 
     it "has a correctly vat splitting" do
       b.rates
-      expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.euro(80)})
+      expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.new(80,Vatcalc.currency)})
     end
 
   end
@@ -256,7 +256,7 @@ end
   #   end
 
   #   it "has a correctly vat splitting" do
-  #     expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.euro(80)})
+  #     expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.new(80)})
   #   end
 
   # end
