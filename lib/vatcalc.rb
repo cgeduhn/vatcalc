@@ -11,6 +11,8 @@ require "vatcalc/base_element"
 require "vatcalc/service_element"
 require "vatcalc/bill"
 
+require "vatcalc/acts_as_bill_element"
+
 module Vatcalc
   mattr_accessor :currency
 

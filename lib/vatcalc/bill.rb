@@ -36,10 +36,12 @@ module Vatcalc
       when Array
         raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}
         return self
-      # TODO ACTS AS SERVICE 
-      # TODO ACTS AS BASE
+      when Vatcalc.acts_service_element?
+
+      when Vatcalc.acts_base_element?
+
       when nil
-        raise ArgumentError.new ("Can't insert nil into #{self}")
+        raise ArgumentError.new ("Can't insert a #{raw_obj.class} into #{self}")
       end
 
       quantity ||= 1

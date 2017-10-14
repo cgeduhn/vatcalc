@@ -22,7 +22,7 @@ module Vatcalc
 
       if opt[:net] == true
         @net_service = true
-        super 0, amount, (opt[:currency] || opt[:curr])
+        super amount, amount, (opt[:currency] || opt[:curr])
       else
         @net_service = false
         super amount, 0, (opt[:currency] || opt[:curr])
