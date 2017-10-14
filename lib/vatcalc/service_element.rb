@@ -19,17 +19,10 @@ module Vatcalc
     # => b = ServiceElement.new 10.00, currency: "USD", net: true
     # => b.gross = 10.70
     def initialize(amount,opt={})
-
-      if opt[:net] == true
-        @net_service = true
-        super amount, amount, (opt[:currency] || opt[:curr])
-      else
-        @net_service = false
-        super amount, 0, (opt[:currency] || opt[:curr])
-      end
-
+      @net_service = opt[:net] == true
+      #if an service element is initialize gross equals net
+      super amount, amount, (opt[:currency] || opt[:curr])
       change_rates opt.fetch(:rates,{})
-
     end
 
     # Allocates net or gross by new vat_percentage rates and calculates the vat splitted by given rates
