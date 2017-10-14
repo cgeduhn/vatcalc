@@ -29,20 +29,17 @@ module Vatcalc
     #    b.net.to_f = 9.35
     # => b = BaseElement.new 10.00, vat_percentage: 7,  currency: "USD", net: true
     # => b.gross = 10.70
-    def initialize(amount,options={})
-      opt = options.to_h
-
-      @currency = (opt[:currency] || opt[:curr])
-
+    def initialize(amount,currency: nil, vat_percentage: nil, net: false)
+      @currency = currency
       amount =  Util.convert_to_money(amount || 0, @currency)
 
-      @vat_percentage = (vp = (opt[:vat_percentage])) ? VATPercentage.new(vp) : Vatcalc.vat_percentage
+      @vat_percentage = (vp=vat_percentage) ? VATPercentage.new(vp) : Vatcalc.vat_percentage
 
       # is the amount a net value or a gross value
-      if opt[:net] == true
-        super(amount * vat_percentage, amount, @currency)
+      if net == true
+        super(amount * self.vat_percentage, amount, @currency)
       else
-        super(amount, amount / vat_percentage, @currency)
+        super(amount, amount / self.vat_percentage, @currency)
       end
     end
 

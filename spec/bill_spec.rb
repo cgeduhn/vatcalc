@@ -13,7 +13,7 @@ RSpec.describe Vatcalc::Bill do
       Vatcalc::Bill.new(base: [
         {amount: 100.00,vat_percentage: 7},
         100,
-        {vat_percentage: 19.00,value: 100.00}
+        {vat_percentage: 19.00,amount: 100.00}
       ])
     }
 
@@ -42,7 +42,7 @@ RSpec.describe Vatcalc::Bill do
     let (:b) {
       Vatcalc::Bill.new(base: [
         {amount: 50.45,vat_percentage: 0},
-        {vat_percentage: 0,value: 45.45}
+        {vat_percentage: 0,amount: 45.45}
       ])
     }
     it "calculates correctly the sum" do 
@@ -72,9 +72,9 @@ RSpec.describe Vatcalc::Bill do
       r = Proc.new{|it| rand(100000).to_f * (rand*100)}
       100.times do |i|
         b = Vatcalc::Bill.new(base: [
-          {value: r.call,vat_percentage: 0.00, quantity: 2},
-          {value: r.call,vat_percentage: 7, quantity: 2},
-          {value: r.call,vat_percentage: 19,   quantity: 2}
+          {amount: r.call,vat_percentage: 0.00, quantity: 2},
+          {amount: r.call,vat_percentage: 7, quantity: 2},
+          {amount: r.call,vat_percentage: 19,   quantity: 2}
         ])
         d = (b.rates.values.sum.to_d(Vatcalc::Bill::RoundPrecision))
         expect(1.00 - d).to be <= (Vatcalc::Bill::Tolerance)

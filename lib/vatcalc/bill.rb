@@ -10,13 +10,13 @@ module Vatcalc
 
     delegate :gross,:net,:vat, to: :total
 
-    def initialize(opt={})
+    def initialize(base: [], services: [], currency: nil)
       @base_elements = []
       @service_elements = []
-      @currency = (opt[:currency])
+      @currency = currency
 
-      insert_base_element(opt.fetch(:base,[]))
-      insert_service_element(opt.fetch(:services,[]))
+      insert_base_element(base)
+      insert_service_element(services)
 
     end
 
@@ -31,11 +31,14 @@ module Vatcalc
 
     def insert(raw_obj, quantity = 1, gnv_klass = BaseElement) 
       case raw_obj
-      when Hash then quantity = raw_obj.fetch(:quantity,quantity || 1).to_i
+      when Hash then quantity = (raw_obj.delete(:quantity) || 1).to_i
       when Array 
         return raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}.last
+
       when Vatcalc.acts_as_service_element? then gnv_klass = ServiceElement
       when Vatcalc.acts_as_base_element? then gnv_klass = BaseElement
+
+
       when BaseElement then gnv_klass = BaseElement
       when ServiceElement then gnv_klass = ServiceElement
       when Numeric #nothin todo
@@ -149,7 +152,7 @@ module Vatcalc
       when Numeric,Money
         klass.new(obj,klass_options)
       when Hash
-        klass.new(obj[:amount] || obj[:gross] || obj[:value], obj.merge(klass_options))
+        klass.new(obj.delete(:amount), obj.merge(klass_options))
       else
         raise TypeError.new "#{obj} can't be converted into a #{klass}"
       end
