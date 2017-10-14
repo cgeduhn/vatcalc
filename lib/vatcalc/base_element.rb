@@ -36,7 +36,7 @@ module Vatcalc
 
       amount =  Util.convert_to_money(amount || 0, @currency)
 
-      @vat_percentage = (vp = (opt[:vat_percentage] || opt[:percentage])) ? VATPercentage.new(vp) : Vatcalc.vat_percentage
+      @vat_percentage = (vp = (opt[:vat_percentage])) ? VATPercentage.new(vp) : Vatcalc.vat_percentage
 
       # is the amount a net value or a gross value
       if opt[:net] == true

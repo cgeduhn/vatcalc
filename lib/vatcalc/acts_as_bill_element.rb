@@ -1,20 +1,13 @@
 module Vatcalc
 
-  def self.acts_as_service_element?
-    ->(obj) { obj.respond_to?(as_service_element_method) }
-  end
-
   def self.acts_as_base_element?
-    ->(obj) { obj.respond_to?(as_base_element_method) }
+    ->(obj) { obj.respond_to?(:as_vatcalc_base_element) }
   end
 
-  def self.as_service_element_method
-    :as_vatcalc_service_element
+  def self.acts_as_service_element?
+    ->(obj) { obj.respond_to?(:as_vatcalc_service_element) }
   end
 
-  def self.as_base_element_method
-    :as_vatcalc_base_element
-  end
 
   module ActsAsBillElement
 
@@ -23,22 +16,26 @@ module Vatcalc
     end
 
 
-
     module ClassMethods
-      def acts_as_bill_element(amount_method, options={})
+      def acts_as_bill_element(amount_method, service: false, currency: nil, vat_percentage: nil)
 
-        if options.to_h.delete(:service) == true
-           m_name = Vatcalc.as_service_element_method
+        if service
+           m_name = :as_vatcalc_service_element
            klass  = ServiceElement
+
+           delegate :vat_splitted, prefix: options[:prefix], to: m_name
         else
-          m_name =  Vatcalc.as_base_element_method
+          m_name =  :as_vatcalc_base_element
           klass  =  BaseElement
+
+          delegate :vat_percentage, prefix: options[:prefix], to: m_name
         end
+        delegate :gross,:net,:vat, prefix: options[:prefix], to: m_name 
 
         define_method(m_name) do
           v_name = :"@#{m_name}"
           unless instance_variable_get(v_name)
-            args = [amount_method,options[:currency],options[:vat_percentage]].collect do |it|
+            args = [amount_method,vat_percentage,currency].collect do |it|
               case it
               when Proc
                 it.call(self)
@@ -55,7 +52,7 @@ module Vatcalc
           instance_variable_get(v_name)
         end
 
-        delegate :gross,:net,:vat, prefix: options[:prefix], to: m_name 
+        
 
       end
     end

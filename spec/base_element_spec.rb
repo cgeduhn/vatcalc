@@ -15,22 +15,22 @@ RSpec.describe Vatcalc::BaseElement do
     end
 
     it "has correct values with 7 percent" do 
-      obj = Vatcalc::BaseElement.new(100.00,percentage: 7)
+      obj = Vatcalc::BaseElement.new(100.00,vat_percentage: 7)
       expect(obj.net.to_f).to eq(93.46) 
       expect(obj.vat.to_f).to eq(6.54) 
 
-      obj = Vatcalc::BaseElement.new(100.00,net: true,percentage: 7)
+      obj = Vatcalc::BaseElement.new(100.00,net: true,vat_percentage: 7)
       expect(obj.net.to_f).to eq(100.00) 
       expect(obj.vat.to_f).to eq(7.00) 
     end
 
     it "has correct values with 0 percent" do 
-      obj = Vatcalc::BaseElement.new(100.00,percentage: 0)
+      obj = Vatcalc::BaseElement.new(100.00,vat_percentage: 0)
       expect(obj.net.to_f).to eq(100.00) 
       expect(obj.vat.to_f).to eq(0.00) 
 
 
-      obj = Vatcalc::BaseElement.new(100.00,net: true,percentage: 0)
+      obj = Vatcalc::BaseElement.new(100.00,net: true,vat_percentage: 0)
       expect(obj.net.to_f).to eq(100.00) 
       expect(obj.vat.to_f).to eq(0.00) 
     end
@@ -45,13 +45,13 @@ RSpec.describe Vatcalc::BaseElement do
     end
 
     it "has correct values with 7 percent" do 
-      obj = Vatcalc::BaseElement.new(45.45,percentage: 7)
+      obj = Vatcalc::BaseElement.new(45.45,vat_percentage: 7)
       expect(obj.net.to_f).to eq(42.48) 
       expect(obj.vat.to_f).to eq(2.97) 
     end
 
     it "has correct values with 0 percent" do 
-      obj = Vatcalc::BaseElement.new(45.45,percentage: 0)
+      obj = Vatcalc::BaseElement.new(45.45,vat_percentage: 0)
       expect(obj.net.to_f).to eq(45.45) 
       expect(obj.vat.to_f).to eq(0.00) 
     end

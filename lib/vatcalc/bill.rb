@@ -61,7 +61,6 @@ module Vatcalc
       end
 
       self
-
     end
 
     def elements 

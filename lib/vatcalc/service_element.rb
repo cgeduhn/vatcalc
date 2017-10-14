@@ -20,7 +20,7 @@ module Vatcalc
     # => b.gross = 10.70
     def initialize(amount,opt={})
       @net_service = opt[:net] == true
-      #if an service element is initialize gross equals net
+      #if an service element is initialized # =>  gross equals net
       super amount, amount, (opt[:currency] || opt[:curr])
       change_rates opt.fetch(:rates,{})
     end

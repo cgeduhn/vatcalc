@@ -31,11 +31,11 @@ module Vatcalc
 
 
     def vat_of(v,vp=nil)
-      BaseElement.new(v,percentage: vp).vat
+      BaseElement.new(v,vat_percentage: vp).vat
     end
 
     def net_of(v,vp=nil)
-      BaseElement.new(v,percentage: vp).net
+      BaseElement.new(v,vat_percentage: vp).net
     end
 
   end

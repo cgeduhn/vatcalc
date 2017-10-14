@@ -13,7 +13,7 @@ RSpec.describe Vatcalc::Bill do
       Vatcalc::Bill.new(base: [
         {amount: 100.00,vat_percentage: 7},
         100,
-        {percentage: 19.00,value: 100.00}
+        {vat_percentage: 19.00,value: 100.00}
       ])
     }
 
@@ -42,7 +42,7 @@ RSpec.describe Vatcalc::Bill do
     let (:b) {
       Vatcalc::Bill.new(base: [
         {amount: 50.45,vat_percentage: 0},
-        {percentage: 0,value: 45.45}
+        {vat_percentage: 0,value: 45.45}
       ])
     }
     it "calculates correctly the sum" do 
@@ -55,8 +55,8 @@ RSpec.describe Vatcalc::Bill do
   end
 
   describe "containing 2 elements with vat percentage of 7" do
-    let(:obj1) { Vatcalc::BaseElement.new(47.47,percentage: 7) }
-    let(:obj2) { Vatcalc::BaseElement.new(45.45,percentage: 7) }
+    let(:obj1) { Vatcalc::BaseElement.new(47.47,vat_percentage: 7) }
+    let(:obj2) { Vatcalc::BaseElement.new(45.45,vat_percentage: 7) }
 
     let(:b) { Vatcalc::Bill.new(base: [[obj1,1],[obj2,1]]) }
 
@@ -85,8 +85,8 @@ RSpec.describe Vatcalc::Bill do
 
   describe "containing base elements and service_elements" do
 
-    let(:elem1) {Vatcalc::BaseElement.new(10.00, percentage: 19, net: true)}
-    let(:elem2) {Vatcalc::BaseElement.new(10.00, percentage:  "7%", net: true)}
+    let(:elem1) {Vatcalc::BaseElement.new(10.00, vat_percentage: 19, net: true)}
+    let(:elem2) {Vatcalc::BaseElement.new(10.00, vat_percentage:  "7%", net: true)}
 
     let (:s) { Vatcalc::ServiceElement.new(5.00) }
     let(:b) { Vatcalc::Bill.new(base: [elem1,elem2], services: [s]) }
@@ -126,9 +126,9 @@ RSpec.describe Vatcalc::Bill do
 
 
   describe "with a base with VAT percentage of 19 and 7 and a coupon " do 
-    let(:elem1) {Vatcalc::BaseElement.new(9.99, percentage: 19)}
-    let(:elem2) {Vatcalc::BaseElement.new(9.99, percentage:  7)}
-    let(:elem3) {Vatcalc::BaseElement.new(9.99, percentage:  0)}
+    let(:elem1) {Vatcalc::BaseElement.new(9.99, vat_percentage: 19)}
+    let(:elem2) {Vatcalc::BaseElement.new(9.99, vat_percentage:  7)}
+    let(:elem3) {Vatcalc::BaseElement.new(9.99, vat_percentage:  0)}
 
     let (:s) {Vatcalc::ServiceElement.new(-3.00)}
 
@@ -182,7 +182,7 @@ RSpec.describe Vatcalc::Bill do
 
 
   describe "with a simple base with VAT percentage of 19" do 
-    let(:elem) {Vatcalc::BaseElement.new(10.00,percentage: 19)}
+    let(:elem) {Vatcalc::BaseElement.new(10.00,vat_percentage: 19)}
 
     let (:s) {Vatcalc::ServiceElement.new(5.00)}
 
@@ -209,7 +209,7 @@ RSpec.describe Vatcalc::Bill do
 
 
   describe "with a simple base with VAT percentage of 19 and USD" do 
-    let (:b) {Vatcalc::Bill.new(currency: "USD", base: {amount: 10.00, percentage: 19}, services: {amount: 5.00}, )}
+    let (:b) {Vatcalc::Bill.new(currency: "USD", base: {amount: 10.00, vat_percentage: 19}, services: {amount: 5.00}, )}
 
     let (:s) {b.service_elements.last.last}
 
@@ -241,7 +241,7 @@ end
 
 
   # describe "with a simple base with VAT percentage of 19" do 
-  #   let(:elem) {Vatcalc::BaseElement.new(10.00,percentage: 19)}
+  #   let(:elem) {Vatcalc::BaseElement.new(10.00,vat_percentage: 19)}
   #   let (:b) {Vatcalc::Base.new.insert(elem)}
 
 
