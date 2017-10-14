@@ -52,7 +52,7 @@ module Vatcalc
 
 
     def inspect
-      "#<#{self.class.name} vat_percentage:#{vat_p} gross:#{gross} net: #{net} vat:#{vat} >"
+      "#<#{self.class.name} vat_percentage:#{vat_p} gross:#{gross} net: #{net} vat:#{vat} currency:#{@currency}>"
     end
 
   end

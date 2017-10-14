@@ -55,6 +55,7 @@ module Vatcalc
             gn_vector = ->(vp,splitted) { Vector[splitted, splitted / vp] }
           end
           # Init new vector after the allocate calculation
+          # Comes from superclass GNV
           init_vector(0,0)
           @vat_splitted = {}
           new_rates.keys.zip(allocated).each do |vp,splitted|
@@ -74,7 +75,7 @@ module Vatcalc
 
     def hash
       #vector comes from GNV
-      [gross,net].hash
+      [@vector,@vat_splitted].hash
     end
 
     def ==(oth)
@@ -83,7 +84,7 @@ module Vatcalc
 
 
     def inspect
-      "#<#{self.class.name} vat_splitted:#{vat_splitted} gross:#{gross} net: #{net} vat:#{vat} >"
+      "#<#{self.class.name} vat_splitted:#{vat_splitted} gross:#{gross} net: #{net} vat:#{vat} currency: #{@currency}>"
     end
 
 

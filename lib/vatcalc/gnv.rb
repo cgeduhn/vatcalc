@@ -26,14 +26,12 @@ module Vatcalc
 
     [:+,:-].each do |m_name|
       define_method(m_name) do |oth|
-        oth.is_a?(GNV) ? v = @vector.send(m_name,oth.vector) : raise(TypeError.new) 
-        to_gnv(v)
+        oth.is_a?(GNV) ? to_gnv(@vector.send(m_name,oth.vector)) : raise(TypeError.new) 
       end
     end
 
     def *(oth)
-      oth.is_a?(Numeric) ? v = @vector * oth : raise(TypeError.new) 
-      to_gnv(v)
+      oth.is_a?(Numeric) ? to_gnv(@vector * oth) : raise(TypeError.new) 
     end
 
     #For usage of => - GNV.new(100.00,90.00)
