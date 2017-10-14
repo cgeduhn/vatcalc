@@ -31,13 +31,15 @@ module Vatcalc
 
     def insert(raw_obj, quantity = 1, gnv_klass = BaseElement) 
       case raw_obj
-      when Vatcalc.acts_as_service_element? 
-      when Vatcalc.acts_as_base_element? 
       when Hash then quantity = raw_obj.fetch(:quantity,quantity || 1).to_i
-      when Array
-        raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}
-        return self
-      when nil then raise ArgumentError.new ("Can't insert a #{raw_obj.class} into #{self}")
+      when Array 
+        return raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}.last
+      when Vatcalc.acts_as_service_element? then gnv_klass = ServiceElement
+      when Vatcalc.acts_as_base_element? then gnv_klass = BaseElement
+      when BaseElement then gnv_klass = BaseElement
+      when ServiceElement then gnv_klass = ServiceElement
+      when Numeric #nothin todo
+      else raise ArgumentError.new ("Can't insert a #{raw_obj.class} into #{self}")
       end
 
       quantity ||= 1
@@ -135,7 +137,7 @@ module Vatcalc
 
     private 
 
-    def obj_to_gnv(klass,obj,klass_options={})
+    def obj_to_gnv(klass,obj)
       klass_options = {currency: @currency}
       klass_options[:rates] = rates if klass == ServiceElement
 
