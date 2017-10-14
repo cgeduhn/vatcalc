@@ -12,12 +12,17 @@ module Vatcalc
     attr_reader :vat_percentage
     alias_method :percentage, :vat_percentage
     alias_method :vat_p, :vat_percentage
+
+
     #Initalizes a new Object of an BaseElement
     #@param amount = [Money,Numeric]
     #@param options = [Hash]
+    #
     # Assumes that the amount is a gross value but you can pass a net value as well if you pass the 
     # option net: true 
+    #
     #@example 
+    #
     # => b = BaseElement.new 10.00, vat_percentage: 19, currency: "EUR"
     #    b.net.to_f = 8.40
     # => b = BaseElement.new 10.00, vat_percentage: 7,  currency: "USD"

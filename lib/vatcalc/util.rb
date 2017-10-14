@@ -29,7 +29,7 @@ module Vatcalc
       # => human_percentage_value(0.19) => 19% 
       def human_percentage_value(value,precision=2)
         full, fraction = ((value.to_f)*100).to_f.round(precision).divmod(1)
-        full.to_s + (fraction > 0.00 ? ("." + fraction.round(precision).to_s[2..-1]) : "") + "%"
+        full.to_s + (fraction > 0.00 ? ("," + fraction.round(precision).to_s[2..-1]) : "") + "%"
       end
 
       alias_method :conv_to_money, :convert_to_money
