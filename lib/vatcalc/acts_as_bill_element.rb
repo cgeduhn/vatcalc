@@ -31,7 +31,7 @@ module Vatcalc
            m_name = Vatcalc.as_service_element_method
            klass  = ServiceElement
         else
-          m_name =  Vatcalc.base_element_method
+          m_name =  Vatcalc.as_base_element_method
           klass  =  BaseElement
         end
 
