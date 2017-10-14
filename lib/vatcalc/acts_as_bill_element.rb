@@ -17,7 +17,7 @@ module Vatcalc
 
 
     module ClassMethods
-      def acts_as_bill_element(amount_method, service: false, currency: nil, vat_percentage: nil)
+      def acts_as_bill_element(amount:, service: false, currency: nil, vat_percentage: nil, prefix: nil)
 
         if service
            m_name = :as_vatcalc_service_element
@@ -28,14 +28,14 @@ module Vatcalc
           m_name =  :as_vatcalc_base_element
           klass  =  BaseElement
 
-          delegate :vat_percentage, prefix: options[:prefix], to: m_name
+          delegate :vat_percentage, prefix: prefix, to: m_name
         end
-        delegate :gross,:net,:vat, prefix: options[:prefix], to: m_name 
+        delegate :gross,:net,:vat, prefix: prefix, to: m_name 
 
         define_method(m_name) do
           v_name = :"@#{m_name}"
           unless instance_variable_get(v_name)
-            args = [amount_method,vat_percentage,currency].collect do |it|
+            args = [amount,vat_percentage,currency].collect do |it|
               case it
               when Proc
                 it.call(self)
