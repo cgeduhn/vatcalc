@@ -41,9 +41,6 @@ module Vatcalc
       end
     end
 
-    #TODO delegate + and - to: to_base 
-    delegate :+,:-,:*, to: :to_gnv
-
     def hash
       #vector comes from GNV
       [@vector,@vat_percentage].hash
