@@ -1,11 +1,11 @@
 module Vatcalc
 
-  def self.acts_service_element?
-    ->(obj) { obj.respond_to?(Vatcalc.as_service_element_method) }
+  def self.acts_as_service_element?
+    ->(obj) { obj.respond_to?(as_service_element_method) }
   end
 
-  def self.acts_base_element?
-    ->(obj) { obj.respond_to?(Vatcalc.as_base_element_method) }
+  def self.acts_as_base_element?
+    ->(obj) { obj.respond_to?(as_base_element_method) }
   end
 
   def self.as_service_element_method

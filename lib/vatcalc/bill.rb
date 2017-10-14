@@ -31,17 +31,13 @@ module Vatcalc
 
     def insert(raw_obj, quantity = 1, gnv_klass = BaseElement) 
       case raw_obj
-      when Hash
-        quantity = raw_obj.fetch(:quantity,quantity || 1).to_i
+      when Vatcalc.acts_as_service_element? 
+      when Vatcalc.acts_as_base_element? 
+      when Hash then quantity = raw_obj.fetch(:quantity,quantity || 1).to_i
       when Array
         raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}
         return self
-      when Vatcalc.acts_service_element?
-
-      when Vatcalc.acts_base_element?
-
-      when nil
-        raise ArgumentError.new ("Can't insert a #{raw_obj.class} into #{self}")
+      when nil then raise ArgumentError.new ("Can't insert a #{raw_obj.class} into #{self}")
       end
 
       quantity ||= 1
