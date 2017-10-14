@@ -7,8 +7,10 @@ module Vatcalc
     #Initalizes a new Object of an ServiceElement
     #@param amount = [Money,Numeric]
     #@param options = [Hash]
+    #
     # Assumes that the amount is a gross value but you can pass a net value as well if you pass the 
     # option net: true 
+    #
     #@example 
     # => b = ServiceElement.new 10.00, currency: "EUR"
     #    b.net.to_f = 8.40
