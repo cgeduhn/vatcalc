@@ -19,59 +19,54 @@ module Vatcalc
 
     end
 
-    def change_rates(arg)
-      if arg.is_a? Hash
-
-        v_splitted = {}
-
-        if @net_service 
-          to_allocate = net
-          new_gross = Money.new(0,@currency)
-          new_net = net
-        else
-          to_allocate = gross
-          new_gross = gross
-          new_net = Money.new(0,@currency)
-        end
-        # Allocates a amount to the vat_percentage rates
-        # @return [Hash]
-        # @example
-        #   Vatcalc::Service.allocate(100.00) 
-        #   => {1.19 => #<Money fractional:50 currency:EUR>, 1.07 => #<Money fractional:50 currency:EUR>}
-        #
-        # Using basically the allocate function of the Money gem here.
-        # EXPLANATION FROM MONEY GEM: 
-        #
-        # Allocates money between different parties without losing pennies.
-        # After the mathematical split has been performed, leftover pennies will
-        # be distributed round-robin amongst the parties. This means that parties
-        # listed first will likely receive more pennies than ones that are listed later
-        
-        # @param [Array<Numeric>] splits [0.50, 0.25, 0.25] to give 50% of the cash to party1, 25% to party2, and 25% to party3.
-        
-        # @return [Array<Money>]
-        
-        # @example
-        #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
-        #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
-        #
-        if !arg.empty?
-          arg.keys.zip(to_allocate.allocate(arg.values)).to_h.each do |vp,splitted|
-            if @net_service 
-              splitted_net   = splitted
-              splitted_gross = splitted_net * vp
-              new_gross += splitted_gross
-            else
-              splitted_net   = splitted / vp
-              splitted_gross = splitted
-              new_net   += splitted_net
-            end
-            v_splitted[vp] = splitted_gross - splitted_net
+    # Allocates net or gross by new vat_percentage rates and calculates the vat splitted by given rates
+    # @param rates [Hash]
+    # =>
+    # 
+    # @return [Hash]
+    # @example
+    #   => {#<Vatcalc::VATPercentage vat_percentage:19%>=>#<Money fractional:64 currency:EUR>,
+    #       #<Vatcalc::VATPercentage vat_percentage:7%>=>#<Money fractional:39 currency:EUR>}
+    #
+    def change_rates(new_rates)
+      if new_rates.is_a? Hash
+        if !new_rates.empty?
+          # Using basically the allocate function of the Money gem here.
+          # EXPLANATION FROM MONEY GEM: 
+          #
+          # Allocates money between different parties without losing pennies.
+          # After the mathematical split has been performed, leftover pennies will
+          # be distributed round-robin amongst the parties. This means that parties
+          # listed first will likely receive more pennies than ones that are listed later
+          
+          # @param [Array<Numeric>] splits [0.50, 0.25, 0.25] to give 50% of the cash to party1, 25% to party2, and 25% to party3.
+          
+          # @return [Array<Money>]
+          
+          # @example
+          #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
+          #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
+          #
+          if @net_service 
+            allocated = net.allocate(new_rates.values)
+            gn_vector = ->(vp,splitted) { Vector[splitted * vp,splitted ] }
+          else
+            allocated = gross.allocate(new_rates.values)
+            gn_vector = ->(vp,splitted) { Vector[splitted, splitted / vp] }
           end
+          # Init new vector after the allocate calculation
+          init_vector(0,0)
+          @vat_splitted = {}
+          new_rates.keys.zip(allocated).each do |vp,splitted|
+            vec = gn_vector[vp,splitted]
+            @vector += vec
+            @vat_splitted[vp] = vec[0] - vec[1] 
+          end
+          @rates = new_rates
+        else
+          @vat_splitted = {}
         end
-        @vat_splitted = v_splitted
-        init_vector(new_gross,new_net)
-        @rates = arg
+        @rates = new_rates
       else
         ArgumentError.new "Hash must be given not #{arg.class}"
       end
