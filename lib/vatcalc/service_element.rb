@@ -79,7 +79,7 @@ module Vatcalc
     end
 
     def ==(oth)
-      oth.is_a?(ServiceElement) ? oth.gross == gross && oth.net == net && (@vat_splitted == oth.vat_splitted) : false
+      oth.is_a?(ServiceElement) && oth.gross == gross && oth.net == net && (@vat_splitted == oth.vat_splitted)
     end
 
 

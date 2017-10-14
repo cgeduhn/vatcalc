@@ -41,7 +41,7 @@ module Vatcalc
 
 
     def ==(oth)
-      oth.is_a?(GNV) ? oth.vector == @vector : false
+      oth.is_a?(GNV) && oth.vector == @vector
     end
 
     alias_method :eql?, :==

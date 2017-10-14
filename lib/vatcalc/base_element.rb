@@ -47,7 +47,7 @@ module Vatcalc
     end
 
     def ==(oth)
-      oth.is_a?(BaseElement) ? (oth.vector == @vector) && (vat_p == oth.vat_p) : false
+      oth.is_a?(BaseElement) && (oth.vector == @vector) && (vat_p == oth.vat_p)
     end
 
 
