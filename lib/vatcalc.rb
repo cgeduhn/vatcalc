@@ -30,12 +30,16 @@ module Vatcalc
     alias :percentage= :vat_percentage=
 
 
-    def vat_of(v,vp=nil)
-      BaseElement.new(v,vat_percentage: vp).vat
+    def vat_of(v,**args)
+      BaseElement.new(v,**args).vat
     end
 
-    def net_of(v,vp=nil)
-      BaseElement.new(v,vat_percentage: vp).net
+    def net_of(v,**args)
+      BaseElement.new(v,**args).net
+    end
+
+    def gross_of(v,**args)
+      BaseElement.new(v,**args).gross
     end
 
   end
