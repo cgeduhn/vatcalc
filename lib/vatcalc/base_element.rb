@@ -31,8 +31,10 @@ module Vatcalc
     # => b.gross = 10.70
     def initialize(amount,currency: nil, vat_percentage: nil, net: false)
       @currency = currency || Vatcalc.currency
-      @vat_percentage = Util.to_vat_percentage(vat_percentage)
-      @vector = self.class.vector_by_vat_percentage(amount: amount, vat_percentage: @vat_percentage, net: net, currency: @currency)
+      amount = Util.to_money(amount,@currency)
+      vp = Util.to_vat_percentage(vat_percentage)
+      @vector = net ? Vector[amount * vp, amount] : Vector[amount, amount / vp] 
+      @vat_percentage = vp
     end
 
     def hash

@@ -59,9 +59,10 @@ module Vatcalc
           init_vector(0,0)
           @vat_splitted = {}
           new_rates.keys.zip(allocated).each do |vp,splitted|
-            vec = self.class.vector_by_vat_percentage(amount: splitted, net: @net_service,vat_percentage: vp, currency: @currency)
-            @vector += vec
-            @vat_splitted[vp] = vec[0] - vec[1] 
+            #creating a new base element
+            b = BaseElement.new(splitted, net: @net_service,vat_percentage: vp, currency: @currency)
+            @vector += b.vector
+            @vat_splitted[vp] = b.vat 
           end
           @rates = new_rates
         else
