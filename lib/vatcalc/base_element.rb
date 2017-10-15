@@ -31,7 +31,7 @@ module Vatcalc
     # => b.gross = 10.70
     def initialize(amount,currency: nil, vat_percentage: nil, net: false)
       @currency = currency || Vatcalc.currency
-      @vat_percentage = VATPercentage.new(vat_percentage || Vatcalc.vat_percentage) 
+      @vat_percentage = Util.to_vat_percentage(vat_percentage)
       @vector = self.class.vector_by_vat_percentage(amount: amount, vat_percentage: @vat_percentage, net: net, currency: @currency)
     end
 

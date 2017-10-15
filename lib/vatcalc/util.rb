@@ -24,6 +24,31 @@ module Vatcalc
         end
       end
 
+      # ALIAS for convert_to_money method
+      alias_method :conv_to_money, :convert_to_money
+      alias_method :conv_to_m, :convert_to_money
+      alias_method :to_money, :convert_to_money
+
+      #Converts an Object into an VATPercentage Object
+      #@return [VATPercentage]
+      #
+      #@example
+      # => Vatcalc::Util.to_vat_percentage
+      def convert_to_vat_percentage(vat_percentage)
+        case vat_percentage
+        when VATPercentage
+          vat_percentage 
+        when nil
+          Vatcalc.vat_percentage
+        else
+          VATPercentage.new(vat_percentage)
+        end
+      end
+
+      # ALIAS for convert_to_vat_percentage method
+      alias_method :to_vat_percentage, :convert_to_vat_percentage
+      alias_method :to_vat_p, :convert_to_vat_percentage
+
       #Returns a human friendly percentage value
       #@param value = [Float,Integer,String]
       # => human_percentage_value(0.19) => 19% 
@@ -32,8 +57,6 @@ module Vatcalc
         full.to_s + (fraction > 0.00 ? ("," + fraction.round(precision).to_s[2..-1]) : "") + "%"
       end
 
-      alias_method :conv_to_money, :convert_to_money
-      alias_method :conv_to_m, :convert_to_money
     end
 
   end
