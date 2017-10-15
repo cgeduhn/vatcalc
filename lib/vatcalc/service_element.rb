@@ -53,19 +53,13 @@ module Vatcalc
           #   Money.new(5,   "USD").allocate([0.3, 0.7])         #=> [Money.new(2), Money.new(3)]
           #   Money.new(100, "USD").allocate([0.33, 0.33, 0.33]) #=> [Money.new(34), Money.new(33), Money.new(33)]
           #
-          if @net_service 
-            allocated = net.allocate(new_rates.values)
-            gn_vector = ->(vp,splitted) { Vector[splitted * vp,splitted ] }
-          else
-            allocated = gross.allocate(new_rates.values)
-            gn_vector = ->(vp,splitted) { Vector[splitted, splitted / vp] }
-          end
+          allocated = (@net_service ? net : gross).allocate(new_rates.values)
           # Init new vector after the allocate calculation
           # Comes from superclass GNV
           init_vector(0,0)
           @vat_splitted = {}
           new_rates.keys.zip(allocated).each do |vp,splitted|
-            vec = gn_vector[vp,splitted]
+            vec = self.class.vector_by_vat_percentage(amount: splitted, net: @net_service,vat_percentage: vp, currency: @currency)
             @vector += vec
             @vat_splitted[vp] = vec[0] - vec[1] 
           end

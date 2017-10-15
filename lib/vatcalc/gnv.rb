@@ -18,6 +18,17 @@ module Vatcalc
 
     attr_reader :vector,:currency
 
+    def self.vector_by_vat_percentage(amount: , net: false,vat_percentage: nil, currency: nil)
+      amount = Util.convert_to_money(amount,currency)
+      vp = vat_percentage.is_a?(VATPercentage) ? vat_percentage : VATPercentage.new(vat_percentage || Vatcalc.vat_percentage)  
+      if net
+        Vector[amount * vp, amount] 
+      else
+        Vector[amount, amount / vp] 
+      end
+    end
+
+
 
     def initialize(gross,net,cur=nil)
       @currency ||= (cur || Vatcalc.currency)

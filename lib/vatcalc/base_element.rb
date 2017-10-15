@@ -30,17 +30,9 @@ module Vatcalc
     # => b = BaseElement.new 10.00, vat_percentage: 7,  currency: "USD", net: true
     # => b.gross = 10.70
     def initialize(amount,currency: nil, vat_percentage: nil, net: false)
-      @currency = currency
-      amount =  Util.convert_to_money(amount || 0, @currency)
-
-      @vat_percentage = (vp=vat_percentage) ? VATPercentage.new(vp) : Vatcalc.vat_percentage
-
-      # is the amount a net value or a gross value
-      if net == true
-        super(amount * self.vat_percentage, amount, @currency)
-      else
-        super(amount, amount / self.vat_percentage, @currency)
-      end
+      @currency = currency || Vatcalc.currency
+      @vat_percentage = VATPercentage.new(vat_percentage || Vatcalc.vat_percentage) 
+      @vector = self.class.vector_by_vat_percentage(amount: amount, vat_percentage: @vat_percentage, net: net, currency: @currency)
     end
 
     def hash
