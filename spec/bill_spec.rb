@@ -163,7 +163,7 @@ RSpec.describe Vatcalc::Bill do
 
     let (:s) {TestFee.new(price: -3.00)}
 
-    let (:b) { Vatcalc::Bill.new(elements: [elem1,elem2,elem3,s]) }
+    let (:b) { Vatcalc::Bill.new(elements: [elem1,elem2,elem3,[s,2]]) }
 
     #9.99 / 1.19 = 8.39 # => 0.3026 6 95526695527 # =>   0.3027
     #9.99 / 1.07 = 9.34 # => 0.3369 4 083694083693 # =>  0.3369
@@ -181,8 +181,8 @@ RSpec.describe Vatcalc::Bill do
     let (:expected_net) {  m[0]/Vatcalc::VATPercentage.new(19) + m[1]/Vatcalc::VATPercentage.new(7) + m[2] }
 
     it "has correctly net" do
-      expect(b.gross.to_f).to eq(26.97)
-      expect(b.net.to_f).to eq((expected_net + Money.new(27.72*100,Vatcalc.currency)).to_f)
+      expect(b.gross.to_f).to eq(23.97)
+      expect(b.net.to_f).to eq((2*expected_net + Money.new(27.72*100,Vatcalc.currency)).to_f)
 
       
 
