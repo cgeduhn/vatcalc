@@ -2,11 +2,9 @@
 module Vatcalc    
   class Bill 
 
-    
-
-    attr_reader :base_elements
-    attr_reader :service_elements
     attr_reader :currency
+    attr_reader :service_elements
+    attr_reader :base_elements
 
     delegate :gross,:net,:vat, to: :total
 
@@ -29,15 +27,12 @@ module Vatcalc
     end
 
 
-    def insert(raw_obj, quantity = 1, gnv_klass = BaseElement) 
+    def insert(raw_obj, quantity = 1, gnv_klass = nil) 
       case raw_obj
       when Hash then quantity = (raw_obj.delete(:quantity) || 1).to_i
       when Array 
         return raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}.last
-
-      when Vatcalc.acts_as_service_element? then gnv_klass = ServiceElement
-      when Vatcalc.acts_as_base_element? then gnv_klass = BaseElement
-
+      when Vatcalc.acts_as_bill_element? then gnv_klass = raw_obj.as_vatcalc_bill_element.class
 
       when BaseElement then gnv_klass = BaseElement
       when ServiceElement then gnv_klass = ServiceElement
@@ -45,18 +40,17 @@ module Vatcalc
       else raise ArgumentError.new ("Can't insert a #{raw_obj.class} into #{self}")
       end
 
-      quantity ||= 1
-
-      if quantity > 0
+      if (quantity ||= 1) > 0 && !gnv_klass.nil?
 
         gnv = obj_to_gnv(gnv_klass,raw_obj)
+        gnv.source = raw_obj
 
         case gnv
         when BaseElement
-          @base_elements    << [raw_obj,quantity,gnv]
+          @base_elements    << [gnv,quantity]
           rates_changed!
         when ServiceElement
-          @service_elements << [raw_obj,quantity,gnv]
+          @service_elements << [gnv,quantity]
         end
         @currency ||= gnv.currency
 
@@ -66,25 +60,31 @@ module Vatcalc
       self
     end
 
-    def elements 
+
+    def elements
       @base_elements + @service_elements
     end
 
     def vat_percentages
-      @vat_percentages ||= @base_elements.collect{|obj,q,gnv| gnv.vat_p}.to_set
+      @vat_percentages ||= @base_elements.collect{|gnv,q| gnv.vat_p}.to_set
     end
 
-    Totals = {total: :elements, base_total: :base_elements, services_total: :service_elements}
-    Totals.each do |m_name,elem_name|
-      define_method(m_name) do
-        instance_variable_get("@#{m_name}") || instance_variable_set("@#{m_name}", send(elem_name).inject(GNV.new(0,0,@currency)) {|sum, (obj,q,gnv)| sum += (gnv * q)})
-      end
+    def base_total
+      @base_total ||= @base_elements.inject(GNV.new(0,0,@currency)) {|sum, (gnv,q)| sum += (gnv * q)}
+    end
+
+    def services_total
+      @services_total ||= @service_elements.inject(GNV.new(0,0,@currency)) {|sum, (gnv,q)| sum += (gnv * q)}
+    end
+
+    def total
+      @total ||= base_total + services_total
     end
 
     def vat_splitted
       @vat_splitted ||= money_hash.tap do |h|
-        @base_elements.each {|elem,q,gnv| h[gnv.vat_p] += (gnv*q).vat}
-        @service_elements.each {|elem,q,gnv| gnv.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
+        @base_elements.each {|gnv,q| h[gnv.vat_p] += (gnv*q).vat}
+        @service_elements.each {|gnv,q| gnv.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
       end
     end
 
@@ -102,17 +102,16 @@ module Vatcalc
     #@see +rates+
     def rates!
       @rates = Hash.new(0.00)
-      base_net = @base_elements.inject(new_money) { |sum,(elem,q,gnv)| sum += gnv.net * q}
-      if base_net.to_f != 0 
+      if base_total.net.to_f != 0 
         left_over = 1.00
-        grouped_amounts = @base_elements.inject(money_hash){ |h,(elem,q,gnv)| h[gnv.vat_p] += gnv.net * q; h}.sort
+        grouped_amounts = @base_elements.inject(money_hash){ |h,(gnv,q)| h[gnv.vat_p] += gnv.net * q; h}.sort
 
         grouped_amounts.each_with_index do |(vp,amount),i|
           if i == (grouped_amounts.length - 1)
             #last element
             @rates[vp] = left_over.round(RoundPrecision)
           else
-            @rates[vp] = (amount / base_net).round(RoundPrecision)
+            @rates[vp] = (amount / base_total.net).round(RoundPrecision)
             left_over -= @rates[vp]
           end
         end
@@ -167,7 +166,9 @@ module Vatcalc
     end
 
     def reset_instance_variables!
-      Totals.keys.each {|m_name| instance_variable_set("@#{m_name}",nil)}
+      @total = nil
+      @base_total = nil
+      @services_total = nil
       @vat_splitted = nil
       @vat_percentages = nil
     end
@@ -176,7 +177,7 @@ module Vatcalc
     def rates_changed!
       @rates = nil
       rates! if service_elements.any?
-      @service_elements.each do |elem,q,gnv|
+      @service_elements.each do |gnv,q|
         gnv.change_rates(rates)
       end
     end
