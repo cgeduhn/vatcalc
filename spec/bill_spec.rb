@@ -1,5 +1,36 @@
 require "spec_helper"
 
+
+class TestArticle
+
+  include Vatcalc::ActsAsBillElement
+
+  attr_reader :price, :vat_percentage, :net, :currency
+  def initialize(price: ,vat_percentage: Vatcalc.vat_percentage, net: false, currency: "EUR")
+    @price = price
+    @vat_percentage = vat_percentage
+    @net = net
+    @currency = (currency || "EUR")
+  end
+
+  acts_as_bill_element(amount: :price, vat_percentage: :vat_percentage, currency: :currency, prefix: :bill, net: :net)
+end
+
+
+class TestFee
+  include Vatcalc::ActsAsBillElement
+
+  attr_reader :price,:net,:currency
+  def initialize(price: ,net: false, currency: "EUR")
+    @price = price
+    @net = net
+    @currency = (currency || "EUR")
+  end
+
+  acts_as_bill_element(amount: :price, service: true, currency: :currency, prefix: :bill, net: :net)
+end
+
+
 RSpec.describe Vatcalc::Bill do
 
   let(:tolerance) { Vatcalc::Bill::Tolerance }
@@ -10,10 +41,10 @@ RSpec.describe Vatcalc::Bill do
   describe "containing only base elements" do
 
     let (:b) {
-      Vatcalc::Bill.new(base: [
-        {amount: 100.00,vat_percentage: 7},
-        100,
-        {vat_percentage: 19.00,amount: 100.00}
+      Vatcalc::Bill.new(elements: [
+        TestArticle.new(price: 100.00,vat_percentage: 7),
+        TestArticle.new(price: 100),
+        TestArticle.new(price: 100.00,vat_percentage: "19")
       ])
     }
 
@@ -40,9 +71,9 @@ RSpec.describe Vatcalc::Bill do
 
   describe "containing 2 elements with no vat percentage" do
     let (:b) {
-      Vatcalc::Bill.new(base: [
-        {amount: 50.45,vat_percentage: 0},
-        {vat_percentage: 0,amount: 45.45}
+      Vatcalc::Bill.new(elements: [
+        TestArticle.new(price: 50.45, vat_percentage: 0),
+        TestArticle.new(price: 45.45, vat_percentage: 0),
       ])
     }
     it "calculates correctly the sum" do 
@@ -55,10 +86,10 @@ RSpec.describe Vatcalc::Bill do
   end
 
   describe "containing 2 elements with vat percentage of 7" do
-    let(:obj1) { Vatcalc::BaseElement.new(47.47,vat_percentage: 7) }
-    let(:obj2) { Vatcalc::BaseElement.new(45.45,vat_percentage: 7) }
+    let(:obj1) { TestArticle.new(price: 47.47,vat_percentage: 7) }
+    let(:obj2) { TestArticle.new(price: 45.45,vat_percentage: 7) }
 
-    let(:b) { Vatcalc::Bill.new(base: [[obj1,1],[obj2,1]]) }
+    let(:b) { Vatcalc::Bill.new(elements: [[obj1,1],[obj2,1]]) }
 
     it "calculates correctly the sum" do 
       expect(b.gross.to_f).to eq(92.92)
@@ -68,14 +99,14 @@ RSpec.describe Vatcalc::Bill do
   end
 
   describe "calculating random rates" do
+
     it "has correctly rates" do
       r = Proc.new{|it| rand(100000).to_f * (rand*100)}
       100.times do |i|
-        b = Vatcalc::Bill.new(base: [
-          {amount: r.call,vat_percentage: 0.00, quantity: 2},
-          {amount: r.call,vat_percentage: 7, quantity: 2},
-          {amount: r.call,vat_percentage: 19,   quantity: 2}
-        ])
+        obj1 = [TestArticle.new(price: r.call,vat_percentage: 0.00),2]
+        obj2 = [TestArticle.new(price: r.call,vat_percentage: 7.00),2]
+        obj3 = [TestArticle.new(price: r.call,vat_percentage: 19.00),2]
+        b = Vatcalc::Bill.new(elements: [obj1,obj2,obj3])
         d = (b.rates.values.sum.to_d(Vatcalc::Bill::RoundPrecision))
         expect(1.00 - d).to be <= (Vatcalc::Bill::Tolerance)
       end
@@ -85,11 +116,11 @@ RSpec.describe Vatcalc::Bill do
 
   describe "containing base elements and service_elements" do
 
-    let(:elem1) {Vatcalc::BaseElement.new(10.00, vat_percentage: 19, net: true)}
-    let(:elem2) {Vatcalc::BaseElement.new(10.00, vat_percentage:  "7%", net: true)}
+    let(:elem1) {TestArticle.new(price: 10.00, vat_percentage: 19, net: true)}
+    let(:elem2) {TestArticle.new(price: 10.00, vat_percentage:  "7%", net: true)}
 
-    let (:s) { Vatcalc::ServiceElement.new(5.00) }
-    let(:b) { Vatcalc::Bill.new(base: [elem1,elem2], services: [s]) }
+    let (:s) { TestFee.new(price: 5.00) }
+    let(:b) { Vatcalc::Bill.new(elements: [elem1,elem2,s]) }
 
     let(:s_net) { Money.new((2.5/1.19)*100,Vatcalc.currency) + Money.new(100*(2.5/1.07),Vatcalc.currency) }
 
@@ -110,12 +141,12 @@ RSpec.describe Vatcalc::Bill do
     it "has correctly vat splitting" do
 
       expect(b.vat_splitted).to eq({
-        Vatcalc::VATPercentage.new(19) => elem1.vat + Money.new(40,Vatcalc.currency),
-        Vatcalc::VATPercentage.new(7) =>  elem2.vat + Money.new(16,Vatcalc.currency),
+        Vatcalc::VATPercentage.new(19) => elem1.bill_vat + Money.new(40,Vatcalc.currency),
+        Vatcalc::VATPercentage.new(7) =>  elem2.bill_vat + Money.new(16,Vatcalc.currency),
       })
 
 
-      expect(s.vat_splitted).to eq({
+      expect(s.bill_vat_splitted).to eq({
         Vatcalc::VATPercentage.new(19) => Money.new(40,Vatcalc.currency),
         Vatcalc::VATPercentage.new(7) =>  Money.new(16,Vatcalc.currency)
       })
@@ -126,13 +157,13 @@ RSpec.describe Vatcalc::Bill do
 
 
   describe "with a base with VAT percentage of 19 and 7 and a coupon " do 
-    let(:elem1) {Vatcalc::BaseElement.new(9.99, vat_percentage: 19)}
-    let(:elem2) {Vatcalc::BaseElement.new(9.99, vat_percentage:  7)}
-    let(:elem3) {Vatcalc::BaseElement.new(9.99, vat_percentage:  0)}
+    let(:elem1) {TestArticle.new(price: 9.99, vat_percentage: 19)}
+    let(:elem2) {TestArticle.new(price: 9.99, vat_percentage:  7)}
+    let(:elem3) {TestArticle.new(price: 9.99, vat_percentage:  0)}
 
-    let (:s) {Vatcalc::ServiceElement.new(-3.00)}
+    let (:s) {TestFee.new(price: -3.00)}
 
-    let (:b) { Vatcalc::Bill.new(base: [elem1,elem2,elem3], services: s) }
+    let (:b) { Vatcalc::Bill.new(elements: [elem1,elem2,elem3,s]) }
 
     #9.99 / 1.19 = 8.39 # => 0.3026 6 95526695527 # =>   0.3027
     #9.99 / 1.07 = 9.34 # => 0.3369 4 083694083693 # =>  0.3369
@@ -156,22 +187,18 @@ RSpec.describe Vatcalc::Bill do
       
 
       #{"19%"=>"30.27%", "7%"=>"33.69%", "0%"=>"36.04%"}
-      expect(s.net).to eq(expected_net)
+      expect(s.bill_net).to eq(expected_net)
     end
 
     it "has correctly net" do
       bill = Vatcalc::Bill.new
 
-      service = Vatcalc::ServiceElement.new(-3.00)
+      bill.insert s 
 
-      bill.insert_service_element(service)
-
-
-
-      bill.insert_base_element([elem1,elem2,elem3])
+      bill.insert([elem1,elem2,elem3])
       
 
-      expect(service.net).to eq(expected_net)
+      expect(s.bill_net).to eq(expected_net)
 
       expect(bill.gross.to_f).to eq(26.97)
       expect(bill.net.to_f).to eq((expected_net + Money.new(27.72*100,Vatcalc.currency)).to_f)
@@ -182,26 +209,26 @@ RSpec.describe Vatcalc::Bill do
 
 
   describe "with a simple base with VAT percentage of 19" do 
-    let(:elem) {Vatcalc::BaseElement.new(10.00,vat_percentage: 19)}
+    let(:elem) {TestArticle.new(price: 10.00,vat_percentage: 19)}
 
-    let (:s) {Vatcalc::ServiceElement.new(5.00)}
+    let (:s) {TestFee.new(price: 5.00)}
 
-    let (:b) {Vatcalc::Bill.new(base: elem,services: s)}
+    let (:b) {Vatcalc::Bill.new(elements: [elem,s])}
 
 
     it "has correctly net" do
       b.rates
-      expect(s.net.to_f).to eq(4.2)
+      expect(s.bill_net.to_f).to eq(4.2)
     end
 
     it "has correctly vat" do
       b.rates
-      expect(s.vat.to_f).to eq(0.8)
+      expect(s.bill_vat.to_f).to eq(0.8)
     end
 
     it "has a correctly vat splitting" do
       b.rates
-      expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.new(80,Vatcalc.currency)})
+      expect(s.bill_vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.new(80,Vatcalc.currency)})
     end
 
   end
@@ -209,12 +236,21 @@ RSpec.describe Vatcalc::Bill do
 
 
   describe "with a simple base with VAT percentage of 19 and USD" do 
-    let (:b) {Vatcalc::Bill.new(currency: "USD", base: {amount: 10.00, vat_percentage: 19}, services: {amount: 5.00}, )}
+    let (:elements) {
+      [
+        TestArticle.new(price: 10.00,vat_percentage: 19,currency: "USD"),
+        TestFee.new(price: 5.00,currency: "USD")
+      ]  
+    }
+    let (:b) {Vatcalc::Bill.new(elements: elements)}
 
     let (:s) {b.service_elements.last.first}
 
-    it "has correctly net" do
+    it "has correctly currency" do
+      expect(b.currency).to eq("USD")
+    end
 
+    it "has correctly net" do
       b.rates
       expect(s.net.to_f).to eq(4.2)
     end
@@ -234,32 +270,6 @@ RSpec.describe Vatcalc::Bill do
 
 end
 
-
-
-  # let (:s) {Vatcalc::ServiceElement}
-  # let (:b) {Vatcalc::Base.new}
-
-
-  # describe "with a simple base with VAT percentage of 19" do 
-  #   let(:elem) {Vatcalc::BaseElement.new(10.00,vat_percentage: 19)}
-  #   let (:b) {Vatcalc::Base.new.insert(elem)}
-
-
-  #   let (:s) {Vatcalc::ServiceElement.new(5.00,b.rates)}
-
-  #   it "has correctly net" do
-  #     expect(s.net.to_f).to eq(4.2)
-  #   end
-
-  #   it "has correctly vat" do
-  #     expect(s.vat.to_f).to eq(0.8)
-  #   end
-
-  #   it "has a correctly vat splitting" do
-  #     expect(s.vat_splitted).to eq({Vatcalc::VATPercentage.new(19) => Money.new(80)})
-  #   end
-
-  # end
 
 
 

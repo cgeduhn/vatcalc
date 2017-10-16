@@ -10,55 +10,35 @@ module Vatcalc
 
     delegate :gross,:net,:vat, to: :total
 
-    def initialize(base: [], services: [], currency: nil)
+    def initialize(elements: [],currency: nil)
       @base_elements = []
       @service_elements = []
       @currency = currency
-
-      insert_base_element(base)
-      insert_service_element(services)
-
+      insert(elements)
     end
 
-    def insert_base_element(raw_obj, quantity = 1)
-      insert(raw_obj, quantity, BaseElement)
-    end
-
-    def insert_service_element(raw_obj, quantity = 1)
-      insert(raw_obj, quantity, ServiceElement)
-    end
-
-
-    def insert(raw_obj, quantity = 1, gnv_klass = nil) 
-      case raw_obj
-      when Hash then quantity = (raw_obj.delete(:quantity) || 1).to_i
+    def insert(obj, quantity = 1) 
+      case obj
       when Array 
-        return raw_obj.each { |obj, quantity| insert(obj, quantity, gnv_klass)}.last
-      when Vatcalc.acts_as_bill_element? then gnv_klass = raw_obj.as_vatcalc_bill_element.class
-
-      when BaseElement then gnv_klass = BaseElement
-      when ServiceElement then gnv_klass = ServiceElement
-      when Numeric #nothin todo
-      else raise ArgumentError.new ("Can't insert a #{raw_obj.class} into #{self}")
+        return obj.each { |obj, quantity| insert(obj, quantity)}.last
+      when Vatcalc.acts_as_bill_element? 
+        gnv = obj.as_vatcalc_bill_element
+      else raise ArgumentError.new ("Can't insert a #{obj.class} into #{self}. #{obj.class} must include Vatcalc::ActsAsBillElement")
       end
 
-      if (quantity ||= 1) > 0 && !gnv_klass.nil?
-
-        gnv = obj_to_gnv(gnv_klass,raw_obj)
-        gnv.source = raw_obj
-
+      if (quantity ||= 1) > 0 
+        gnv.source = obj
         case gnv
         when BaseElement
           @base_elements    << [gnv,quantity]
           rates_changed!
         when ServiceElement
           @service_elements << [gnv,quantity]
+          gnv.change_rates(rates)
         end
         @currency ||= gnv.currency
-
         reset_instance_variables!
       end
-
       self
     end
 
@@ -92,8 +72,7 @@ module Vatcalc
 
     def vat_splitted
       @vat_splitted ||= money_hash.tap do |h|
-        @base_elements.each {|gnv,q| h[gnv.vat_p] += (gnv*q).vat}
-        @service_elements.each {|gnv,q| gnv.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
+        elements.each {|gnv,q| gnv.vat_splitted.each {|vp,vat| h[vp] += q*vat} }
       end
     end
 
@@ -146,25 +125,6 @@ module Vatcalc
 
 
     private 
-
-    def obj_to_gnv(klass,obj)
-      klass_options = {currency: @currency}
-      klass_options[:rates] = rates if klass == ServiceElement
-
-      case obj
-      when BaseElement
-        obj
-      when ServiceElement
-        obj.change_rates(klass_options[:rates])
-        obj
-      when Numeric,Money
-        klass.new(obj,klass_options)
-      when Hash
-        klass.new(obj.delete(:amount), obj.merge(klass_options))
-      else
-        raise TypeError.new "#{obj} can't be converted into a #{klass}"
-      end
-    end
 
     def money_hash
       Hash.new(new_money)

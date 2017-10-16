@@ -15,12 +15,11 @@ module Vatcalc
     module ClassMethods
       def acts_as_bill_element(amount:, service: false, currency: nil, vat_percentage: nil, prefix: :bill, net: false)
 
-        args_to_convert = {amount: amount,currency: currency}
-        delegators = [:gross,:net,:vat]
+        args_to_convert = {amount: amount,currency: currency,net: net}
+        delegators = [:gross,:net,:vat,:vat_splitted]
 
         if service
            klass  = Vatcalc::ServiceElement
-           delegators << :vat_splitted
         else
           klass  =  Vatcalc::BaseElement
           args_to_convert[:vat_percentage] = vat_percentage
@@ -39,12 +38,12 @@ module Vatcalc
                 h[k] = v.call(self)
               when Symbol
                 h[k] = send(v)
-              when String,Numeric
+              else
                 h[k] = v
               end
               h
             end
-            instance_variable_set v_name, klass.new( args.delete(:amount), net: net, **args)
+            instance_variable_set v_name, klass.new( args.delete(:amount), **args)
           end
           instance_variable_get(v_name)
         end
