@@ -26,12 +26,20 @@ module Vatcalc
 
     [:+,:-].each do |m_name|
       define_method(m_name) do |oth|
-        oth.is_a?(GNV) ? to_gnv(@vector.send(m_name,oth.vector)) : raise(TypeError.new) 
+        gnv = oth.is_a?(GNV) ? to_gnv(@vector.send(m_name,oth.vector)) : raise(TypeError.new) 
+        gnv.tap do |g|
+          g.vat_splitted = oth.vat_splitted.merge(self.vat_splitted) {|vp,m1,m2| m1 + m2}
+        end
       end
     end
 
     def *(oth)
-      oth.is_a?(Numeric) ? to_gnv(@vector * oth) : raise(TypeError.new) 
+      gnv = oth.is_a?(Numeric) ? to_gnv(@vector * oth) : raise(TypeError.new) 
+      gnv.tap do |g|
+        h = new_money_hash
+        self.vat_splitted.each {|vp,m| h[vp] = m*oth}
+        g.vat_splitted = h
+      end
     end
 
     #For usage of => - GNV.new(100.00,90.00)
@@ -69,6 +77,10 @@ module Vatcalc
       @vector[1]
     end
 
+    def vat_splitted
+      @vat_splitted ||= new_money_hash
+    end
+
     # Returns a Integer hash value based on the +value+
     # in order to use functions like & (intersection), group_by, etc.
     #
@@ -89,10 +101,20 @@ module Vatcalc
       GNV.new(v[0],v[1],@currency)
     end
 
+    protected
+
+    def vat_splitted=(h)
+      @vat_splitted = h
+    end
+
     private 
 
     def init_vector(g,n)
       @vector = Vector[*[g,n].map{|i| Util.to_money(i,@currency)}]
+    end
+
+    def new_money_hash
+      Hash.new(Money.new(0,@currency))
     end
 
 

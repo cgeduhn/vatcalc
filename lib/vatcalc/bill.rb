@@ -12,10 +12,11 @@ module Vatcalc
     alias_method :base_elements, :base
 
     delegate :rates,:rates!,:human_rates,:vat_percentages, to: :@base
+    delegate :each, to: :all
 
     def initialize(elements: [],currency: nil)
-      @base = BaseElementCollection.new
-      @services = ServiceElementCollection.new
+      @base = Base.new
+      @services = Services.new
       @currency = currency
       insert(elements)
     end
@@ -30,15 +31,18 @@ module Vatcalc
       end
       if (quantity ||= 1) > 0 
         gnv.source = obj
+        @currency = gnv.currency
         case gnv
         when BaseElement
           @base.insert(gnv,quantity)
-          @services.rates_changed!(rates) if @services.length > 0
+          # if an base element is inserted after services already in here.
+          @services.rates_changed!(@base.rates) if @services.length > 0
         when ServiceElement
           @services.insert(gnv,quantity)
-          gnv.change_rates(rates)
+          # the service gets now the rates of the base
+          gnv.change_rates(@base.rates)
         end
-        @currency ||= gnv.currency
+
         @base.currency = @currency
         @services.currency = @currency
       end
@@ -67,6 +71,10 @@ module Vatcalc
     alias_method :vat_rates, :rates
     alias_method :elements, :all
 
+    # A GNVCollection consists basically of a an 2D Array of GNV 
+    # GNV Objects +@see Vatcalc::GNV+
+    # It's a helper class to calculate amounts and iterate through 
+    # specific GNV objects.
     class GNVCollection
       include Enumerable
 
@@ -75,6 +83,7 @@ module Vatcalc
 
       delegate :length, :first, :last, to: :@collection
 
+      # which class can be inserted in the collection
       def self.for
         GNV
       end
@@ -86,8 +95,8 @@ module Vatcalc
       
       def insert(gnv,quantity)
         raise(TypeError.new) unless gnv.is_a?(self.class.for)
-        @currency ||= gnv.currency
-        @total = nil
+        @currency = gnv.currency
+        @vat_splitted = nil
         @collection << [gnv,quantity]
         self
       end
@@ -97,12 +106,11 @@ module Vatcalc
       end
 
       def vat_splitted
-        @collection.inject(money_hash) {|h,(gnv,q)| gnv.vat_splitted.each {|vp,vat| h[vp] += q*vat}; h }
+        @vat_splitted ||= @collection.inject(GNV.new(0,0,@currency)){|sum,(gnv,q)| sum += (gnv * q) }.vat_splitted
       end
 
-      delegate :gross,:vat,:net, to: :total
-      def total
-        @total ||= @collection.inject(GNV.new(0,0,@currency)){|sum,(gnv,q)| sum += (gnv * q) }
+      [:gross,:vat,:net].each do |it|
+        define_method(it) { @collection.inject(new_money) {|sum,(gnv,q)| sum += (gnv.send(it) * q) } }
       end
 
       def +(other)
@@ -113,8 +121,7 @@ module Vatcalc
       def each
         result = []
         @collection.each do |gnv,quantity|
-          r = gnv*quantity
-          arr = [gnv.source, quantity, r.gross, r.net, r.vat]
+          arr = [gnv.source, quantity, gross*quantity, net*quantity, vat*quantity]
           result << arr
           yield *arr
         end
@@ -139,7 +146,7 @@ module Vatcalc
     end
 
 
-    class BaseElementCollection < GNVCollection
+    class Base < GNVCollection
 
       attr_reader :vat_percentages
 
@@ -198,13 +205,13 @@ module Vatcalc
 
     end
 
-    class ServiceElementCollection < GNVCollection
+    class Services < GNVCollection
       def self.for
         ServiceElement
       end
 
       def rates_changed!(rates)
-        @total = nil
+        @vat_splitted = nil
         each_gnv {|gnv,_| gnv.change_rates(rates)}
       end
     end

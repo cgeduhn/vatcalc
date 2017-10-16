@@ -35,10 +35,7 @@ module Vatcalc
       vp = Util.to_vat_percentage(vat_percentage)
       @vector = net ? Vector[amount * vp, amount] : Vector[amount, amount / vp] 
       @vat_percentage = vp
-    end
-
-    def vat_splitted
-      {@vat_percentage => vat}
+      @vat_splitted = {@vat_percentage => vat}
     end
 
     def hash
