@@ -17,6 +17,7 @@ module Vatcalc
     include Comparable
 
     attr_reader :vector,:currency
+    attr_accessor :source
 
     def initialize(gross,net,cur=nil)
       @currency ||= (cur || Vatcalc.currency)
