@@ -33,7 +33,7 @@ module Vatcalc
         case gnv
         when BaseElement
           @base.insert(gnv,quantity)
-          @services.rates_changed!(rates) if @services.any?
+          @services.rates_changed!(rates) if @services.length > 0
         when ServiceElement
           @services.insert(gnv,quantity)
           gnv.change_rates(rates)
@@ -90,6 +90,10 @@ module Vatcalc
         @total = nil
         @collection << [gnv,quantity]
         self
+      end
+
+      def <<(arg)
+        insert(arg,1) 
       end
 
       def vat_splitted
