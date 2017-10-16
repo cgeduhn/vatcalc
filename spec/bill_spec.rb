@@ -211,7 +211,7 @@ RSpec.describe Vatcalc::Bill do
   describe "with a simple base with VAT percentage of 19 and USD" do 
     let (:b) {Vatcalc::Bill.new(currency: "USD", base: {amount: 10.00, vat_percentage: 19}, services: {amount: 5.00}, )}
 
-    let (:s) {b.service_elements.last.last}
+    let (:s) {b.service_elements.last.first}
 
     it "has correctly net" do
 
