@@ -2,7 +2,7 @@ module Vatcalc
 
 
   def self.acts_as_bill_element?
-    @acts_as_bill_element ||= ->(obj) { obj.class.respond_to?(:as_vatcalc_bill_element) }
+    @acts_as_bill_element ||= ->(obj) { obj.class.respond_to?(:acts_as_bill_element) && obj.respond_to?(:as_vatcalc_bill_element) }
   end
 
 

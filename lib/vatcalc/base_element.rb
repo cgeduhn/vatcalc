@@ -37,6 +37,10 @@ module Vatcalc
       @vat_percentage = vp
     end
 
+    def vat_splitted
+      {@vat_percentage => vat}
+    end
+
     def hash
       #vector comes from GNV
       [@vector,@vat_percentage].hash

@@ -2,6 +2,8 @@
 module Vatcalc    
   class Bill 
 
+    include Enumerable
+
     attr_reader :currency
     attr_reader :service_elements
     attr_reader :base_elements
@@ -58,6 +60,13 @@ module Vatcalc
       end
 
       self
+    end
+
+    def each
+      elements.each do |gnv, quantity|
+        r = gnv*quantity
+        yield gnv.source, quantity, r.gross, r.net, r.vat, r.vat_splitted
+      end
     end
 
 
