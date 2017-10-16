@@ -13,20 +13,23 @@ module Vatcalc
     end
 
     module ClassMethods
-      def acts_as_bill_element(amount:, service: false, currency: nil, vat_percentage: nil, prefix: :bill)
+      def acts_as_bill_element(amount:, service: false, currency: nil, vat_percentage: nil, prefix: :bill, net: false)
 
-        args_to_convert = {amount: amount, currency: currency}
+        args_to_convert = {amount: amount,currency: currency}
+        delegators = [:gross,:net,:vat]
 
         if service
            klass  = Vatcalc::ServiceElement
-           delegate :vat_splitted, prefix: options[:prefix], to: m_name
+           delegators << :vat_splitted
         else
           klass  =  Vatcalc::BaseElement
           args_to_convert[:vat_percentage] = vat_percentage
-          delegate :vat_percentage, prefix: prefix, to: m_name
+          delegators << :vat_percentage
         end
-        delegate :gross,:net,:vat, prefix: prefix, to: m_name 
-        v_name = :"@#{m_name}"
+
+
+        delegate *delegators, prefix: prefix, to: :as_vatcalc_bill_element
+        v_name = :@as_vatcalc_bill_element
 
         define_method(:as_vatcalc_bill_element) do
           unless instance_variable_get(v_name)
@@ -34,12 +37,14 @@ module Vatcalc
               case v
               when Proc
                 h[k] = v.call(self)
-              when Symbol,String
+              when Symbol
                 h[k] = send(v)
+              when String,Numeric
+                h[k] = v
               end
               h
             end
-            instance_variable_set v_name, klass.new( args.delete(:amount), **args)
+            instance_variable_set v_name, klass.new( args.delete(:amount), net: net, **args)
           end
           instance_variable_get(v_name)
         end

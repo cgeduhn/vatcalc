@@ -24,7 +24,7 @@ module Vatcalc
       when 1..100.00
         as_d((obj.to_f / 100 ) + 1.00)
       else
-        if obj.is_a?(String) && obj.match(/[0-9]{0,2}\.|\,{0,1}[0-9]{0,2}%/)
+        if obj.is_a?(String) && obj.match(/[0-9]{0,2}\.|\,{0,1}[0-9]{0,2}/)
           as_d((obj.gsub("," , ".").to_f / 100) + 1.00)
         else
           raise TypeError.new("Can't convert #{obj.class} #{obj} to an valid #{self.class}")

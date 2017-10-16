@@ -62,7 +62,7 @@ module Vatcalc
             #creating a new base element
             b = BaseElement.new(splitted, net: @net_service,vat_percentage: vp, currency: @currency)
             @vector += b.vector
-            @vat_splitted[vp] = b.vat 
+            @vat_splitted[b.vat_percentage] = b.vat 
           end
           @rates = new_rates
         else
