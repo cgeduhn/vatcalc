@@ -87,8 +87,8 @@ class Product < ActiveRecord::Base
   #now you can call 
   product.bill_gross
   product.bill_net
-  prodcut.bill_vat
-  prodcut.bill_vat_splitted
+  product.bill_vat
+  product.bill_vat_splitted #especially interesting for service objects.
   
   
 end
@@ -96,8 +96,35 @@ end
 
 ## Bill
 
-#creating a new bill object
+Creating a new bill object
 ```ruby
+
+bill = Vatcalc::Bill.new(elements: [product1,product2,fee])
+
+#NOTE: 
+#    If you pass an Array of 2D arrays it is assumed that the first element in 2D Array is the object
+#    and the second element is the quantity.
+#    @example elements: 
+#            [ 
+#                [ product1, 2 ],
+#                [ product2, 1 ] 
+#            ]
+
+#now you can call
+bill.gross
+bill.vat
+bill.net
+bill.vat_splitted #=> 
+
+bill.rates # => 
+
+bill.each do |obj, quantity, gross, vat, net|
+    # do stuff .. 
+end
+
+
+
+
 
 ```
 
