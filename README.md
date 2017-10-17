@@ -79,7 +79,7 @@ class Product < ActiveRecord::Base
   # service:
   #     is the object a service like a Coupon or a Fee ? If this option is set to true
   #     the object has not a fix VAT percentage.
-  #     the vat will be calculated by the non-service object net rates in a bill.
+  #     the vat will be calculated by the non-service net rates in a bill.
   
   
   ....
@@ -118,14 +118,35 @@ bill = Vatcalc::Bill.new(elements: [product1,product2,fee])
 #            ]
 
 #now you can call
-bill.gross
-bill.vat
-bill.net
-bill.vat_splitted #=> 
+bill.gross #=> #<Money fractional:15000 currency:EUR>
+bill.vat #=>  #<Money fractional:1925 currency:EUR>
+bill.net #=> #<Money fractional:13075 currency:EUR>
 
-bill.rates # => 
+
+bill.vat_splitted #=> 
+#
+#   {
+#       #<Vatcalc::VATPercentage vat_percentage:7%> => #<Money fractional:325 currency:EUR>,
+#       #<Vatcalc::VATPercentage vat_percentage:19%> => #<Money fractional:1600 currency:EUR>
+#   } 
+
+# To get the vat rates 
+# These vat rates are the net sums of the non-service elements grouped by vat_percentage and divided by total 
+# non-service elements net amount
+
+bill.vat_rates # => 
+#   {
+#       #<Vatcalc::VATPercentage vat_percentage:19%>=>0.6424,
+#       #<Vatcalc::VATPercentage vat_percentage:7%>=>0.3576,
+#   }
+
+## NOTE: Each service Element will be taxed by these rates.
+
+
+
 
 bill.each do |obj, quantity, gross, vat, net|
+    # NOTE: gross, vat, net are already multiplied by quantity
     # do stuff .. 
 end
 
