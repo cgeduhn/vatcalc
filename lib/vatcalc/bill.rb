@@ -21,6 +21,10 @@ module Vatcalc
       insert(elements)
     end
 
+
+    #inserts one or more element which included the Vatcalc::ActsAsBillElement module
+    #@param obj = [Array,Object]
+    #@result = [Vatcalc::Bill]
     def insert(obj, quantity = 1) 
       case obj
       when Array 
