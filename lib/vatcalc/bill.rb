@@ -15,8 +15,8 @@ module Vatcalc
     delegate :each, to: :all
 
     def initialize(elements: [],currency: nil)
-      @base = Base.new
-      @services = Services.new
+      @base = Base.new #defined at the bottom
+      @services = Services.new #defined at the bottom
       @currency = currency
       insert(elements)
     end
@@ -24,7 +24,7 @@ module Vatcalc
     def insert(obj, quantity = 1) 
       case obj
       when Array 
-        return obj.each { |obj, quantity| insert(obj, quantity)}.last
+        return (obj.each { |obj, quantity| insert(obj, quantity)}.last || self)
       when Vatcalc.acts_as_bill_element? 
         gnv = obj.as_vatcalc_bill_element
       else raise ArgumentError.new ("Can't insert a #{obj.class} into #{self}. #{obj.class} must include Vatcalc::ActsAsBillElement")
@@ -98,6 +98,7 @@ module Vatcalc
         @currency = gnv.currency
         @vat_splitted = nil
         @collection << [gnv,quantity]
+        @gross, @vat, @net = [nil] * 3
         self
       end
 
@@ -110,7 +111,7 @@ module Vatcalc
       end
 
       [:gross,:vat,:net].each do |it|
-        define_method(it) { @collection.inject(new_money) {|sum,(gnv,q)| sum += (gnv.send(it) * q) } }
+        define_method(it) { instance_variable_get("@#{it}") || instance_variable_set( "@#{it}", @collection.inject(new_money) {|sum,(gnv,q)| sum += (gnv.send(it) * q) } ) } 
       end
 
       def +(other)
@@ -212,6 +213,7 @@ module Vatcalc
 
       def rates_changed!(rates)
         @vat_splitted = nil
+        @gross, @vat, @net = [nil] * 3
         each_gnv {|gnv,_| gnv.change_rates(rates)}
       end
     end
