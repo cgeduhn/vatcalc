@@ -9,19 +9,19 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Christopher Geduhn"]
   spec.email         = ["christopher.geduhn@googlemail.com"]
 
-  spec.summary       = %q{ Calculator for vats with included net and base }
-  spec.description   = %q{ Calculator for vats with included net and base }
+  spec.summary       = %q{ A gem to calculate VAT of multiple products with differently VAT percentages. }
+  spec.description   = %q{ A gem to calculate VAT of multiple products with differently VAT percentages. }
   spec.homepage      = "https://github.com/cgeduhn/vatcalc"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against " \
-      "public gem pushes."
-  end
+  # if spec.respond_to?(:metadata)
+  #   spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
+  # else
+  #   raise "RubyGems 2.0 or newer is required to protect against " \
+  #     "public gem pushes."
+  # end
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
