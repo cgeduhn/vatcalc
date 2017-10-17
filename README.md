@@ -96,8 +96,9 @@ end
 
 ## Bill
 
+#creating a new bill object
 ```ruby
-gem 'vatcalc'
+
 ```
 
 
