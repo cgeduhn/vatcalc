@@ -1,8 +1,6 @@
 # Vatcalc
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/vatcalc`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+A gem to calculate VAT of multiple products with differently VAT percentages.
 
 ## Installation
 
@@ -121,6 +119,15 @@ bill = Vatcalc::Bill.new(elements: [product1,product2,fee])
 bill.gross #=> #<Money fractional:15000 currency:EUR>
 bill.vat #=>  #<Money fractional:1925 currency:EUR>
 bill.net #=> #<Money fractional:13075 currency:EUR>
+
+# if you only want to get amounts of the base.
+bill.base.gross
+...
+
+# if you only want to get amounts of the services.
+bill.services.gross
+...
+
 
 
 bill.vat_splitted #=> 
