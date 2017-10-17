@@ -38,10 +38,12 @@ class Product < ActiveRecord::Base
   #         symbol => for a method 
   #         lambda => ->(obj) {obj.price * 3}
   #         Float, Integer for a fix amount.
-  #     NOTE: if the value is an Integer it is assumed that the amount is given in cents.
+  #     NOTE: 
+  #         if the value is an Integer it is assumed that the amount is given in cents.
   # 
   #
-  # currency: self-descriptive [optional] 
+  # currency: 
+  #     self-descriptive [optional] 
   #     standard value is the money default currency
   #     => https://github.com/RubyMoney/money
   #
@@ -51,24 +53,42 @@ class Product < ActiveRecord::Base
   #         String => "EUR", "USD"
   #
   #
-  # vat_percentage: the VAT percentage for the given product. [optional]
-  #      This option will be ignored if you set the service option to true. +see below+
-  #      Default is Vatcalc.vat_percentage => @see section "Configuration"
-  #      you can pass: 
+  # vat_percentage: 
+  #     the VAT percentage for the given product. [optional]
+  #     This option will be ignored if you set the service option to true. +see below+
+  #     Default is Vatcalc.vat_percentage => @see section "Configuration"
+  #     you can pass: 
   #         symbol => for a method 
   #         lambda => ->(obj) {obj.find_my_currency}
   #         String => "EUR", "USD"
-  #      NOTE: if the value is between 1 and 100 the value will be divided by 100. 
-  #            For example if you pass a value like 19 it is assumed that you mean 19% 
-  #            if the value is between 0 and 100 the value won't be divided. 
+  #     NOTE: 
+  #         if the value is between 1 and 100 the value will be divided by 100. 
+  #         For example if you pass a value like 19 it is assumed that you mean 19% 
+  #         if the value is between 0 and 100 the value won't be divided. 
   #
-  #prefix: 
-  #net: is the amount given as net amount ? [optional]
+  # prefix: the prefix to call gross,vat,net,vat_splitted, and vat_percentage on your object.
+  #        @see below.
+  #
+  #
+  # net: 
+  #     is the amount given as net amount ? [optional]
   #     Default => false
-  #service: 
+  #
+  #
+  #
+  # service:
+  #     is the object a service like a Coupon or a Fee ? If this option is set to true
+  #     the object has not a fix VAT percentage.
+  #     the vat will be calculated by the non-service object net rates in a bill.
   
   
   ....
+  
+  #now you can call 
+  product.bill_gross
+  product.bill_net
+  prodcut.bill_vat
+  prodcut.bill_vat_splitted
   
   
 end
