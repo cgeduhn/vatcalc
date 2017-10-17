@@ -20,9 +20,72 @@ Or install it yourself as:
 
     $ gem install vatcalc
 
-## Usage
+## Include
 
-TODO: Write usage instructions here
+Include Vatcalc::ActsAsBillElement in your models / Classes
+
+```ruby
+
+class Product < ActiveRecord::Base
+  include Vatcalc::ActsAsBillElement
+  
+  acts_as_bill_element(amount: price, vat_percentage: :my_vat_percentage_field, currency: "EUR", prefix: :bill)
+  
+  #you can pass the following key value pairs
+  
+  # amount: the price for the product [required]
+  #     you can pass:
+  #         symbol => for a method 
+  #         lambda => ->(obj) {obj.price * 3}
+  #         Float, Integer for a fix amount.
+  #     NOTE: if the value is an Integer it is assumed that the amount is given in cents.
+  # 
+  #
+  # currency: self-descriptive [optional] 
+  #     standard value is the money default currency
+  #     => https://github.com/RubyMoney/money
+  #
+  #     you can pass: 
+  #         symbol => for a method 
+  #         lambda => ->(obj) {obj.other_object.find_my_currency}
+  #         String => "EUR", "USD"
+  #
+  #
+  # vat_percentage: the VAT percentage for the given product. [optional]
+  #      This option will be ignored if you set the service option to true. +see below+
+  #      Default is Vatcalc.vat_percentage => @see section "Configuration"
+  #      you can pass: 
+  #         symbol => for a method 
+  #         lambda => ->(obj) {obj.find_my_currency}
+  #         String => "EUR", "USD"
+  #      NOTE: if the value is between 1 and 100 the value will be divided by 100. 
+  #            For example if you pass a value like 19 it is assumed that you mean 19% 
+  #            if the value is between 0 and 100 the value won't be divided. 
+  #
+  #prefix: 
+  #net: is the amount given as net amount ? [optional]
+  #     Default => false
+  #service: 
+  
+  
+  ....
+  
+  
+end
+```
+
+## Bill
+
+```ruby
+gem 'vatcalc'
+```
+
+
+## Configuration
+
+```ruby
+gem 'vatcalc'
+```
 
 ## Development
 
