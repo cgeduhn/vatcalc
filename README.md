@@ -85,10 +85,17 @@ class Product < ActiveRecord::Base
   ....
   
   #now you can call 
-  product.bill_gross
-  product.bill_net
-  product.bill_vat
-  product.bill_vat_splitted #especially interesting for service objects.
+  product.bill_gross #=> #<Money fractional:1000 currency:EUR>
+  product.bill_net #=> #<Money fractional:840 currency:EUR> 
+  product.bill_vat #=> #<Money fractional:160 currency:EUR> 
+  
+  
+  product.bill_vat_splitted #=> {#<Vatcalc::VATPercentage vat_percentage:19%> => #<Money fractional:160 currency:EUR>}
+  # the key in the result hash is a Vatcalc::VATPercentage object it responds to to_f, to_s, to_d
+  # @example
+  #     vp.to_s => "19%"
+  #     vp.to_f => 1.19
+  #     vp.to_d => #<BigDecimal:7f7ee20989a0,'0.119E1',18(36)>
   
   
 end
