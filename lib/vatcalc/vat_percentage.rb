@@ -46,22 +46,28 @@ module Vatcalc
     #@return [Money]
     #@example
     # => 10.00 * VATPercentage.new(19) #=> #<Money fractional:1190 currency:EUR> 
-    def *(other)
-      case other
-      when Money
-        other * @value
-      when Numeric
-        Util.convert_to_money(other) * @value
-      when VATPercentage
-        raise TypeError.new "Can't multiply a VATPercentage by another VATPercentage"
-      else
-        if other.respond_to?(:coerce)
-          a,b = other.coerce(self)
-          a * b
+    [:/,:*].each do |m_name|
+
+      define_method(m_name) do |other|
+
+        case other
+        when Money
+          other.send(m_name,@value)
+        when Numeric
+          Util.convert_to_money(other).send(m_name,@value)
+        when VATPercentage
+          raise TypeError.new "Can't '#{m_name}' a VATPercentage by another VATPercentage"
         else
-          raise TypeError.new "Can't multiply #{other.class} by VATPercentage"
+          if other.respond_to?(:coerce)
+            a,b = other.coerce(self)
+            a * b
+          else
+            raise TypeError.new "Can't '#{m_name}' #{other.class} by VATPercentage"
+          end
         end
       end
+
+
     end
 
     #@see https://www.mutuallyhuman.com/blog/2011/01/25/class-coercion-in-ruby
