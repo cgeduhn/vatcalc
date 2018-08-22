@@ -15,7 +15,7 @@ module Vatcalc
         case obj
         when Money
           obj
-        when Fixnum
+        when Integer
           Money.new(obj,curr)
         when Numeric
           Money.new(obj*100,curr)
